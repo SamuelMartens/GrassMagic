@@ -9,6 +9,8 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "GMSpellComponent.h"
+
 //////////////////////////////////////////////////////////////////////////
 // AGrassMagicCharacter
 
@@ -45,6 +47,8 @@ AGrassMagicCharacter::AGrassMagicCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	SpellComponent = CreateDefaultSubobject<UGMSpellComponent>(TEXT("SpellComponent"));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -57,6 +61,10 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("AcquireResources", IE_Pressed, this, &AGrassMagicCharacter::AcquireResources_Start);
+	PlayerInputComponent->BindAction("AcquireResources", IE_Released, this, &AGrassMagicCharacter::AcquireResources_End);
+
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGrassMagicCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGrassMagicCharacter::MoveRight);
 
@@ -64,44 +72,7 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &AGrassMagicCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AGrassMagicCharacter::LookUpAtRate);
-
-	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &AGrassMagicCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AGrassMagicCharacter::TouchStopped);
-
-	// VR headset functionality
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AGrassMagicCharacter::OnResetVR);
-}
-
-
-void AGrassMagicCharacter::OnResetVR()
-{
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
-
-void AGrassMagicCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
-{
-		Jump();
-}
-
-void AGrassMagicCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-		StopJumping();
-}
-
-void AGrassMagicCharacter::TurnAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AGrassMagicCharacter::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AGrassMagicCharacter::MoveForward(float Value)
@@ -131,4 +102,16 @@ void AGrassMagicCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void AGrassMagicCharacter::AcquireResources_Start()
+{
+	SpellComponent->HandleAcquireResourceInput(1.0);
+	startAcquire = true;
+}
+
+void AGrassMagicCharacter::AcquireResources_End()
+{
+	startAcquire = false;
+
 }

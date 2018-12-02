@@ -61,8 +61,8 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAction("AcquireResources", IE_Pressed, this, &AGrassMagicCharacter::AcquireResources_Start);
-	PlayerInputComponent->BindAction("AcquireResources", IE_Released, this, &AGrassMagicCharacter::AcquireResources_End);
+	PlayerInputComponent->BindAction("AcquireResources", IE_Pressed, this, &AGrassMagicCharacter::AcquireResources<IE_Pressed>);
+	PlayerInputComponent->BindAction("AcquireResources", IE_Released, this, &AGrassMagicCharacter::AcquireResources<IE_Released>);
 
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGrassMagicCharacter::MoveForward);
@@ -104,14 +104,8 @@ void AGrassMagicCharacter::MoveRight(float Value)
 	}
 }
 
-void AGrassMagicCharacter::AcquireResources_Start()
+void AGrassMagicCharacter::AcquireResource(EInputEvent inputEvent)
 {
-	SpellComponent->HandleAcquireResourceInput(1.0);
-	startAcquire = true;
-}
-
-void AGrassMagicCharacter::AcquireResources_End()
-{
-	startAcquire = false;
-
+	SpellComponent->HandleAcquireResourceInput(inputEvent);
+	startAcquire = inputEvent == IE_Pressed;
 }

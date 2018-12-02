@@ -23,6 +23,8 @@ class AGrassMagicCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SpellSystem, meta = (AllowPrivateAccess = "true"))
 	class UGMSpellComponent* SpellComponent;
 
+	void AcquireResource(EInputEvent inputEvent);
+
 public:
 	AGrassMagicCharacter();
 
@@ -33,21 +35,16 @@ public:
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
-	
-	// #DEBUG make this private
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SpellSystem)
-	bool startAcquire;
 
 protected:
-
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
-	void AcquireResources_Start();
-	void AcquireResources_End();
+	template<EInputEvent inputEvent> 
+	void AcquireResources() { AcquireResource(inputEvent); };
 
 protected:
 	// APawn interface
@@ -61,4 +58,3 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 };
-

@@ -12,6 +12,9 @@ class AGrassMagicCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	// NOTE: movement axis value in "Project Setting should alway match this value 
+	const static float Input_Value_Per_Tick;
+
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -45,6 +48,9 @@ protected:
 
 	template<EInputEvent inputEvent> 
 	void AcquireResources() { AcquireResource(inputEvent); };
+
+	void BeginPlay() override;
+
 
 protected:
 	// APawn interface

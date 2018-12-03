@@ -11,6 +11,9 @@
 
 #include "GMSpellComponent.h"
 
+
+const float AGrassMagicCharacter::Input_Value_Per_Tick = 1.0f;
+
 //////////////////////////////////////////////////////////////////////////
 // AGrassMagicCharacter
 
@@ -51,6 +54,14 @@ AGrassMagicCharacter::AGrassMagicCharacter()
 	SpellComponent = CreateDefaultSubobject<UGMSpellComponent>(TEXT("SpellComponent"));
 }
 
+void AGrassMagicCharacter::BeginPlay()
+{
+
+	Super::BeginPlay();
+
+	SpellComponent->Init(Input_Value_Per_Tick);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -80,6 +91,8 @@ void AGrassMagicCharacter::MoveForward(float Value)
 	if (Controller == NULL || Value == 0.0f)
 		return;
 
+	Value = SpellComponent->AdjustMovementOnResourceAcquire(Value);
+
 	// find out which way is forward
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -94,6 +107,8 @@ void AGrassMagicCharacter::MoveRight(float Value)
 	if (Controller == NULL || Value == 0.0f)
 		return;
 
+	Value = SpellComponent->AdjustMovementOnResourceAcquire(Value);
+
 	// find out which way is right
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -101,6 +116,7 @@ void AGrassMagicCharacter::MoveRight(float Value)
 	// get right vector 
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 	// add movement in that direction
+	
 	AddMovementInput(Direction, Value);
 }
 

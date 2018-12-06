@@ -88,10 +88,10 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 void AGrassMagicCharacter::MoveForward(float Value)
 {
+	Value = SpellComponent->AdjustMovementOnResourceAcquire(Value);
+
 	if (Controller == NULL || Value == 0.0f)
 		return;
-
-	Value = SpellComponent->AdjustMovementOnResourceAcquire(Value);
 
 	// find out which way is forward
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -104,10 +104,10 @@ void AGrassMagicCharacter::MoveForward(float Value)
 
 void AGrassMagicCharacter::MoveRight(float Value)
 {
+	Value = SpellComponent->AdjustMovementOnResourceAcquire(Value);
+
 	if (Controller == NULL || Value == 0.0f)
 		return;
-
-	Value = SpellComponent->AdjustMovementOnResourceAcquire(Value);
 
 	// find out which way is right
 	const FRotator Rotation = Controller->GetControlRotation();

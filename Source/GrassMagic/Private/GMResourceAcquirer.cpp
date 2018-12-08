@@ -3,8 +3,8 @@
 #include "GMResourceAcquirer.h"
 #include "GameFramework/PawnMovementComponent.h"
 
-const float UGMResourceAcquirer::Acquire_Tick = 1.0f;
-const float UGMResourceAcquirer::Acquire_Delay = 1.0f;
+const float UGMResourceAcquirer::Acquire_Tick = 0.15f;
+const float UGMResourceAcquirer::Acquire_Delay = 0.35f;
 
 const float UGMResourceAcquirer::Movement_Adjust_Rate = 0.07f;
 const float UGMResourceAcquirer::Movement_Adjust_Timer_Interval = 1.0f;

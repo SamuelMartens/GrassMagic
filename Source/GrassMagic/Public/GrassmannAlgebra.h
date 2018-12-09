@@ -29,6 +29,8 @@ struct FBivector
 	FBivector(const FBivector&) = default;
 	FBivector(FBivector&&) = default;
 	FBivector& operator=(const FBivector&) = default;
+	FBivector& operator=(FBivector&&) = default;
+
 private:
 
 	friend struct FGA;
@@ -54,6 +56,7 @@ struct FTrivector
 	FTrivector(const FTrivector&) = default;
 	FTrivector(FTrivector&&) = default;
 	FTrivector& operator=(const FTrivector&) = default;
+	FTrivector& operator=(FTrivector&&) = default;
 
 private:
 

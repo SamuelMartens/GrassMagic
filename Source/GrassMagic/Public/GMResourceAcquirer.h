@@ -10,7 +10,7 @@ class GRASSMAGIC_API UGMResourceAcquirer : public UObject
 {
 	GENERATED_BODY()
 
-	enum class State
+	enum class EState : int8_t
 	{
 		Idle,
 		Prepare,
@@ -42,8 +42,8 @@ public:
 
 private:
 
-	State CurrentState;
-
+	EState CurrentState;
+	s
 	UFUNCTION()
 	void OnTickResourceAcquire();
 

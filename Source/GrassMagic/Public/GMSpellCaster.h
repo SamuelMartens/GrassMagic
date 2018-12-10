@@ -6,14 +6,13 @@
 #include "UObject/NoExportTypes.h"
 #include "GMSpellCaster.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class GRASSMAGIC_API UGMSpellCaster : public UObject
 {
 	GENERATED_BODY()
-	
+
+
+public: 
 
 	
 	

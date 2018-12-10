@@ -14,7 +14,7 @@ UGMResourceAcquirer::UGMResourceAcquirer():
 	Owner(nullptr),
 	MovementOffset(0.0f),
 	MaximumMovmentInput(0.0f),
-	CurrentState(State::Idle)
+	CurrentState(EState::Idle)
 {}
 
 
@@ -27,30 +27,30 @@ void UGMResourceAcquirer::Init(AActor* OwnerActor, float OwnerMovementExpectedIn
 
 void UGMResourceAcquirer::Acquire()
 {
-	CurrentState = State::Prepare;
+	CurrentState = EState::Prepare;
 }
 
 void UGMResourceAcquirer::StopAcquire()
 {
 	Owner->GetWorldTimerManager().ClearTimer(TimerHandle_ResourceAcquire);
-	CurrentState = State::Idle;
+	CurrentState = EState::Idle;
 	MovementOffset = 0.0f;
 }
 
 bool UGMResourceAcquirer::IsAcquire() const
 {
-	return CurrentState == State::InProgress;
+	return CurrentState == EState::InProgress;
 }
 
 float UGMResourceAcquirer::AdjustMovement(float Value)
 {
 	switch (CurrentState)
 	{
-	case State::Idle:
+	case EState::Idle:
 		return Value;
-	case State::Prepare:
+	case EState::Prepare:
 		return Prepare(Value);
-	case State::InProgress:
+	case EState::InProgress:
 		return 0.0f;
 	default:
 		return Value;
@@ -64,7 +64,7 @@ void UGMResourceAcquirer::OnTickResourceAcquire()
 
 float UGMResourceAcquirer::Prepare(float InputValue)
 {
-	check(CurrentState == State::Prepare);
+	check(CurrentState == EState::Prepare);
 	
 	APawn* PawnOwner = Cast<APawn>(Owner);
 	
@@ -92,7 +92,7 @@ float UGMResourceAcquirer::Prepare(float InputValue)
 	// If we don't move we can cast
 	if (MovementOffset >= MaximumMovmentInput)
 	{
-		CurrentState = State::InProgress;
+		CurrentState = EState::InProgress;
 
 		// Set timer to start acquire
 		Owner->GetWorldTimerManager().SetTimer(TimerHandle_ResourceAcquire, this,

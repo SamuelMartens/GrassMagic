@@ -72,8 +72,19 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	// Resources
 	PlayerInputComponent->BindAction("AcquireResources", IE_Pressed, this, &AGrassMagicCharacter::AcquireResources<IE_Pressed>);
 	PlayerInputComponent->BindAction("AcquireResources", IE_Released, this, &AGrassMagicCharacter::AcquireResources<IE_Released>);
+
+	// Gestures
+	PlayerInputComponent->BindAction("DamageGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleDamageGesture<IE_Pressed>);
+	PlayerInputComponent->BindAction("DamageGesture", IE_Released, this, &AGrassMagicCharacter::HandleDamageGesture<IE_Released>);
+
+	PlayerInputComponent->BindAction("ControlGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleControlGesture<IE_Pressed>);
+	PlayerInputComponent->BindAction("ControlGesture", IE_Released, this, &AGrassMagicCharacter::HandleControlGesture<IE_Released>);
+
+	PlayerInputComponent->BindAction("ChangeGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleControlGesture<IE_Pressed>);
+	PlayerInputComponent->BindAction("ChangeGesture", IE_Released, this, &AGrassMagicCharacter::HandleControlGesture<IE_Released>);
 
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGrassMagicCharacter::MoveForward);
@@ -118,6 +129,21 @@ void AGrassMagicCharacter::MoveRight(float Value)
 	// add movement in that direction
 	
 	AddMovementInput(Direction, Value);
+}
+
+void AGrassMagicCharacter::HandleDamageGesture(EInputEvent InputEvent)
+{
+
+}
+
+void AGrassMagicCharacter::HandleControlGesture(EInputEvent InputEvent)
+{
+
+}
+
+void AGrassMagicCharacter::HandleChangeGesture(EInputEvent InputEvent)
+{
+
 }
 
 void AGrassMagicCharacter::AcquireResource(EInputEvent inputEvent)

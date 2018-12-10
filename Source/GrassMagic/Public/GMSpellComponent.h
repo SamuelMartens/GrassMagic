@@ -29,6 +29,12 @@ public:
 
 	float AdjustMovementOnResourceAcquire(float Value) const;
 
+
+	/* Spell cast Interface */
+	void HandleDamageGesture(EInputEvent Action);
+	void HandleControlGesture(EInputEvent Action);
+	void HandleChangeGesture(EInputEvent Action);
+
 protected:
 
 public:	

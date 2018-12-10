@@ -33,6 +33,21 @@ float UGMSpellComponent::AdjustMovementOnResourceAcquire(float Value) const
 	return ResAcq->AdjustMovement(Value);
 }
 
+void UGMSpellComponent::HandleDamageGesture(EInputEvent Action)
+{
+
+}
+
+void UGMSpellComponent::HandleControlGesture(EInputEvent Action)
+{
+
+}
+
+void UGMSpellComponent::HandleChangeGesture(EInputEvent Action)
+{
+
+}
+
 int UGMSpellComponent::GetResources() const
 {
 	return ResAcq->GetResources();

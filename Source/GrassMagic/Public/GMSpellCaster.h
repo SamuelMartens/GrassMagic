@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "GMSpellState.h"
+
 #include "GMSpellCaster.generated.h"
 
 UCLASS()
@@ -14,6 +16,22 @@ class GRASSMAGIC_API UGMSpellCaster : public UObject
 
 public: 
 
-	
+	void Init(AActor* OwnerActor);
+
+	void StartDamageGesture();
+	void StopDamageGesture();
+
+private:
+
+	UFUNCTION()
+	void OnTickGestureCast();
+
+	FGMSpellState State;
+
+	TWeakObjectPtr<AActor> Owner;
+
+	FTimerHandle TimerHandle_GestureCast;
+
+	FVector CurrentCastGesture;
 	
 };

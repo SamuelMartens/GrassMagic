@@ -11,8 +11,13 @@ class GRASSMAGIC_API UGMSpellComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	// Use UPROPERTY to avoid garbage collection of this object
 	UPROPERTY()
 	class UGMResourceAcquirer* ResAcq;
+
+	// Use UPROPERTY to avoid garbage collection of this object
+	UPROPERTY()
+	class UGMSpellCaster* SpellCaster;
 
 public:	
 	// Sets default values for this component's properties

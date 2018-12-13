@@ -43,7 +43,7 @@ public:
 private:
 
 	EState CurrentState;
-	s
+	
 	UFUNCTION()
 	void OnTickResourceAcquire();
 

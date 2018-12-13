@@ -46,6 +46,8 @@ public:
 		}
 	}
 
+	FVector GetAllTypes() const noexcept { return Base; }
+
 	FGMBaseGesture(float X, float Y, float Z) :Base(X, Y, Z)
 	{}
 

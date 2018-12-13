@@ -124,7 +124,7 @@ struct FGA
 };
 
 // Operators overload
-FBivector operator*(float Num, const FBivector& B) noexcept
+inline FBivector operator*(float Num, const FBivector& B) noexcept
 {
 	return FBivector
 	(
@@ -134,18 +134,18 @@ FBivector operator*(float Num, const FBivector& B) noexcept
 	);
 }
 
-FBivector operator*(const FBivector& B, float Num) noexcept
+inline FBivector operator*(const FBivector& B, float Num) noexcept
 {
 	return Num * B;
 }
 
 
-FTrivector operator*(float Num, const FTrivector& T) noexcept
+inline FTrivector operator*(float Num, const FTrivector& T) noexcept
 {
 	return FTrivector(FGA::E123(T) * Num);
 }
 
-FTrivector operator*(const FTrivector& T, float Num) noexcept
+inline FTrivector operator*(const FTrivector& T, float Num) noexcept
 {
 	return Num * T;
 }

@@ -3,16 +3,19 @@
 #include "GMSpellComponent.h"
 
 #include "GMResourceAcquirer.h"
+#include "GMSpellCaster.h"
 
 // Sets default values for this component's properties
 UGMSpellComponent::UGMSpellComponent()
 {
 	ResAcq = NewObject<UGMResourceAcquirer>(this, UGMResourceAcquirer::StaticClass(), TEXT("ResourceAcquierer"));
+	SpellCaster = NewObject<UGMSpellCaster>(this, UGMSpellCaster::StaticClass(), TEXT("SpellCaster"));
 }
 
 void UGMSpellComponent::Init(float ExpectedMovementInput)
 {
 	ResAcq->Init(GetOwner(), ExpectedMovementInput);
+	SpellCaster->Init(GetOwner());
 }
 
 void UGMSpellComponent::HandleAcquireResourceInput(EInputEvent action)

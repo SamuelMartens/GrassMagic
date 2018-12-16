@@ -16,6 +16,9 @@ class GRASSMAGIC_API UGMSpellCaster : public UObject
 
 public: 
 
+	UGMSpellCaster(): CastStartTime(0.0f)
+	{}
+
 	void Init(AActor* OwnerActor);
 
 	void StartDamageGesture();
@@ -23,8 +26,8 @@ public:
 
 private:
 
-	UFUNCTION()
-	void OnTickGestureCast();
+	void StartGestureGeneric();
+	void StopGestureGeneric(FVector GestureVector);
 
 	FGMSpellState State;
 
@@ -32,6 +35,6 @@ private:
 
 	FTimerHandle TimerHandle_GestureCast;
 
-	FVector CurrentCastGesture;
+	FTimespan CastStartTime;
 	
 };

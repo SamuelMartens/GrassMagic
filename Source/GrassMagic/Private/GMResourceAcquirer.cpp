@@ -20,6 +20,8 @@ UGMResourceAcquirer::UGMResourceAcquirer():
 
 void UGMResourceAcquirer::Init(AActor* OwnerActor, float OwnerMovementExpectedInput)
 {
+	check(OwnerActor);
+
 	Owner = OwnerActor;
 	MaximumMovmentInput = OwnerMovementExpectedInput;
 

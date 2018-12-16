@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GrassmannAlgebra.h"
+#include "GMGestures.h"
 
 #include <tuple>
 
@@ -35,37 +36,34 @@ public:
 		FTrivector Trivector;
 	};
 
+	struct FActiveEffect
+	{
+		FActiveEffect():
+			Value(0),
+			Type(FGMBaseGesture::EType::None)
+		{};
+
+		FActiveEffect(FActiveEffect&&) = default;
+		FActiveEffect& operator=(FActiveEffect&&) = default;
+
+		FActiveEffect(float NewValue, FGMBaseGesture::EType NewType):
+			Value(NewValue),
+			Type(NewType)
+		{}
+
+		float Value;
+		FGMBaseGesture::EType Type;
+	};
+
+
 	FGMSpellState() :
 		ActiveGrade(0)
 	{};
 
 	~FGMSpellState() = default;
-
-
-	void SetBase(float Val) noexcept
-	{
-		ActiveGrade = 0;
-		Base.Scalar = Val;
-	}
-
-	void SetBase(FVector Val) noexcept
-	{
-		ActiveGrade = 1;
-		Base.Vector = Val;
-	}
-
-	void SetBase(FBivector Val) noexcept
-	{
-		ActiveGrade = 2;
-		Base.Bivector = Val;
-	}
-
-	void SetBase(FTrivector Val) noexcept
-	{
-		ActiveGrade = 3;
-		Base.Trivector = Val;
-	}	
 	
+	void AddGesture(const FGMBaseGesture& Gesture);
+
 	std::tuple<FStateBase, int> GetState() const noexcept 
 	{ 
 		return std::make_tuple(Base, ActiveGrade);
@@ -74,7 +72,12 @@ public:
 
 private:
 
-	FStateBase Base;
+	void UpdateActiveEffect(const FGMBaseGesture& Gesture);
 
+	FStateBase Base;
+	FActiveEffect ActiveEffect;
+
+	
 	int ActiveGrade;
+
 };

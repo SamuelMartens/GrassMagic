@@ -11,6 +11,7 @@ class FGMBaseGesture
 {
 public:
 
+	// If you change this look at GMGetEffectValue.h
 	enum class EType : int8_t
 	{
 		// Represents X axis
@@ -30,23 +31,7 @@ public:
 	
 	virtual ~FGMBaseGesture() {};
 
-	float GetValue(EType Type) const noexcept
-	{
-		switch (Type)
-		{
-		case EType::Damage:
-			return Base.X;
-		case EType::Control:
-			return Base.Y;
-		case EType::Change:
-			return Base.Z;
-		default:
-			return 0.0f;
-			break;
-		}
-	}
-
-	FVector GetAllTypes() const noexcept { return Base; }
+	FVector GetBase() const noexcept { return Base; }
 
 	FGMBaseGesture(float X, float Y, float Z) :Base(X, Y, Z)
 	{}

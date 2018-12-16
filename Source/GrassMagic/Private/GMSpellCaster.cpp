@@ -2,7 +2,7 @@
 
 #include "GMSpellCaster.h"
 #include "GMGestures.h"
-
+#include "Kismet/GameplayStatics.h"
 
 
 void UGMSpellCaster::Init(AActor* OwnerActor)
@@ -13,17 +13,23 @@ void UGMSpellCaster::Init(AActor* OwnerActor)
 
 void UGMSpellCaster::StartDamageGesture()
 {
-	CurrentCastGesture = FGMDamageGesture::Inst().GetAllTypes();
-	// Here is specialized function for time grow goes, we start it by timer
+	StartGestureGeneric();
 }
 
 void UGMSpellCaster::StopDamageGesture()
 {
-	// We stop timer and mix new shader with base
-	CurrentCastGesture = FVector(0, 0, 0);
+	StopGestureGeneric(FGMDamageGesture::Inst().GetBase());
 }
 
-void UGMSpellCaster::OnTickGestureCast()
+void UGMSpellCaster::StartGestureGeneric()
 {
-
+	CastStartTime = FTimespan::FromSeconds(UGameplayStatics::GetRealTimeSeconds(Owner->GetWorld()));
 }
+
+void UGMSpellCaster::StopGestureGeneric(FVector GestureVector)
+{
+	FTimespan CastTime = FTimespan::FromSeconds(UGameplayStatics::GetRealTimeSeconds(Owner->GetWorld())) - CastStartTime;
+	GestureVector *= CastTime.GetTotalMilliseconds() * 0.005f;
+	// And now we are mix dude
+}
+

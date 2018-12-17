@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GrassmannAlgebra.h"
 
 /**
  *  Implements framework to create gestures in 
@@ -11,17 +12,16 @@ class FGMBaseGesture
 {
 public:
 
-	// If you change this look at GMGetEffectValue.h
 	enum class EType : int8_t
 	{
 		// Represents X axis
-		Damage = 0,
+		Damage = FGA::EBasis::E1,
 		// Represents Y axis
-		Control = 1,
+		Control = FGA::EBasis::E2,
 		// Represents Z axis
-		Change = 2,
+		Change = FGA::EBasis::E3,
 		// Use in case if type is undefined
-		None = 3
+		None = FGA::EBasis::None
 	};
 
 	FGMBaseGesture(const FGMBaseGesture&) = delete;

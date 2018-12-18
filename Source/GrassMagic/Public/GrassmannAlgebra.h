@@ -75,6 +75,9 @@ FTrivector operator*(float Num, const FTrivector& T) noexcept;
 // Grassmann algebra
 struct FGA
 {
+	// This represent number of dimension our Grassmann Algebra operates in
+	constexpr static int Dimension = 3;
+
 	enum class EBasis : int8_t
 	{
 		None = 0b0000,
@@ -85,9 +88,16 @@ struct FGA
 
 	using BasisInfoValue_t = std::pair<uint8_t, float>;
 
+
 	static uint8_t BitAnd(EBasis Val1, EBasis Val2) noexcept
 	{
 		return static_cast<uint8_t>(Val1) &
+			static_cast<uint8_t>(Val2);
+	}
+
+	static uint8_t BitOr(EBasis Val1, EBasis Val2) noexcept
+	{
+		return static_cast<uint8_t>(Val1) |
 			static_cast<uint8_t>(Val2);
 	}
 
@@ -128,7 +138,7 @@ struct FGA
 	static float E23(const FBivector& B, uint8_t* MetaInfo = nullptr) noexcept
 	{ 
 		if (MetaInfo)
-			*MetaInfo = BitAnd(EBasis::E2, EBasis::E3);
+			*MetaInfo = BitOr(EBasis::E2, EBasis::E3);
 
 		return B._E23;
 	}
@@ -136,7 +146,7 @@ struct FGA
 	static float E31(const FBivector& B, uint8_t* MetaInfo = nullptr) noexcept
 	{
 		if (MetaInfo)
-			*MetaInfo = BitAnd(EBasis::E3, EBasis::E1);
+			*MetaInfo = BitOr(EBasis::E3, EBasis::E1);
 
 		return B._E31;
 	}
@@ -144,7 +154,7 @@ struct FGA
 	static float E12(const FBivector& B, uint8_t* MetaInfo = nullptr) noexcept
 	{ 
 		if (MetaInfo)
-			*MetaInfo = BitAnd(EBasis::E1, EBasis::E2);
+			*MetaInfo = BitOr(EBasis::E1, EBasis::E2);
 
 		return B._E12;
 	}
@@ -157,7 +167,7 @@ struct FGA
 	static float E123(const FTrivector& T, uint8_t* MetaInfo = nullptr) noexcept
 	{
 		if (MetaInfo)
-			*MetaInfo = BitAnd(EBasis::E1, EBasis::E2) & static_cast<uint8_t>(EBasis::E3);
+			*MetaInfo = BitOr(EBasis::E1, EBasis::E2) | static_cast<uint8_t>(EBasis::E3);
 
 		return T._E123;
 	}
@@ -177,16 +187,16 @@ struct FGA
 	static std::vector<BasisInfoValue_t> GetBasisInfoValueArray(const FBivector& Bivector)
 	{
 		return std::vector<BasisInfoValue_t>({
-			std::make_pair(BitAnd(EBasis::E2, EBasis::E3), E23(Bivector)),
-			std::make_pair(BitAnd(EBasis::E3, EBasis::E1), E31(Bivector)),
-			std::make_pair(BitAnd(EBasis::E1, EBasis::E2), E12(Bivector))
+			std::make_pair(BitOr(EBasis::E2, EBasis::E3), E23(Bivector)),
+			std::make_pair(BitOr(EBasis::E3, EBasis::E1), E31(Bivector)),
+			std::make_pair(BitOr(EBasis::E1, EBasis::E2), E12(Bivector))
 			});
 	}
 
 	static std::vector<BasisInfoValue_t> GetBasisInfoValueArray(const FTrivector& Trivector)
 	{
 		return std::vector<BasisInfoValue_t>({
-			std::make_pair(BitAnd(EBasis::E1, EBasis::E2) & static_cast<uint8_t>(EBasis::E3), E123(Trivector))
+			std::make_pair(BitOr(EBasis::E1, EBasis::E2) | static_cast<uint8_t>(EBasis::E3), E123(Trivector))
 			});
 	}
 

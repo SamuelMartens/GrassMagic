@@ -36,28 +36,10 @@ public:
 		FTrivector Trivector;
 	};
 
-	struct FActiveEffect
-	{
-		FActiveEffect():
-			Value(0),
-			Type(FGMBaseGesture::EType::None)
-		{};
-
-		FActiveEffect(FActiveEffect&&) = default;
-		FActiveEffect& operator=(FActiveEffect&&) = default;
-
-		FActiveEffect(float NewValue, FGMBaseGesture::EType NewType):
-			Value(NewValue),
-			Type(NewType)
-		{}
-
-		float Value;
-		FGMBaseGesture::EType Type;
-	};
-
 
 	FGMSpellState() :
-		ActiveGrade(0)
+		ActiveGrade(0),
+		ActiveType(static_cast<uint8_t>(FGMBaseGesture::EType::None))
 	{};
 
 	~FGMSpellState() = default;
@@ -75,9 +57,8 @@ private:
 	void UpdateActiveEffect(const FGMBaseGesture& Gesture);
 
 	FStateBase Base;
-	FActiveEffect ActiveEffect;
-
 	
 	int ActiveGrade;
+	uint8_t ActiveType;
 
 };

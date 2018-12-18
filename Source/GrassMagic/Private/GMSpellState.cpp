@@ -12,21 +12,30 @@ void FGMSpellState::AddGesture(const FGMBaseGesture& Gesture)
 	{
 	case 0:
 		Base.Vector = Gesture.GetBase();
-		ActiveGrade = 1;
 		break;
 	case 1:
 		Base.Bivector = FGA::WedgeProduct(Base.Vector, Gesture.GetBase());
-		ActiveGrade = 2;
 		break;
 	case 2:
 		Base.Trivector = FGA::WedgeProduct(Base.Bivector, Gesture.GetBase());
-		ActiveGrade = 3;
 	case 3:
 		Base.Scalar = 0;
-		ActiveGrade = 0;
 	default:
 		check(false);
 		break;
+	}
+
+	// General routine for mixing gestures
+	if (ActiveGrade < FGA::Dimension)
+	{
+		++ActiveGrade;
+		ActiveType = static_cast<uint8_t>(Gesture.GetDominantType()) |
+			static_cast<uint8_t>(ActiveType);
+	}
+	else
+	{
+		ActiveGrade = 0;
+		ActiveType = static_cast<uint8_t>(FGMBaseGesture::EType::None);
 	}
 }
 

@@ -32,9 +32,8 @@ public:
 
 	void Init(AActor* OwnerActor, float OwnerMovementExpectedInput);
 
-	void Acquire();
+	void StartAcquire();
 	void StopAcquire();
-	bool IsAcquire() const;
 
 	int GetResources() const { return Resources; };
 

@@ -27,7 +27,7 @@ void UGMResourceAcquirer::Init(AActor* OwnerActor, float OwnerMovementExpectedIn
 
 }
 
-void UGMResourceAcquirer::Acquire()
+void UGMResourceAcquirer::StartAcquire()
 {
 	CurrentState = EState::Prepare;
 }
@@ -37,11 +37,6 @@ void UGMResourceAcquirer::StopAcquire()
 	Owner->GetWorldTimerManager().ClearTimer(TimerHandle_ResourceAcquire);
 	CurrentState = EState::Idle;
 	MovementOffset = 0.0f;
-}
-
-bool UGMResourceAcquirer::IsAcquire() const
-{
-	return CurrentState == EState::InProgress;
 }
 
 float UGMResourceAcquirer::AdjustMovement(float Value)

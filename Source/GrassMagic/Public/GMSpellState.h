@@ -16,7 +16,7 @@ class GRASSMAGIC_API FGMSpellState
 {
 public:
 
-	enum class EStateParam : int8_t
+	enum class EStateParam : uint8_t
 	{
 		StateBase = 0,
 		ActiveGrade = 1
@@ -38,27 +38,34 @@ public:
 
 
 	FGMSpellState() :
-		ActiveGrade(0),
-		ActiveType(static_cast<uint8_t>(FGMBaseGesture::EType::None))
+		ActiveTypes(static_cast<uint8_t>(FGMBaseGesture::EType::None))
 	{};
 
 	~FGMSpellState() = default;
 	
-	void AddGesture(const FGMBaseGesture& Gesture);
+	void AddEffect(const FVector& EffectValue, FGMBaseGesture::EType Type) noexcept;
 
 	std::tuple<FStateBase, int> GetState() const noexcept 
 	{ 
-		return std::make_tuple(Base, ActiveGrade);
+		return std::make_tuple(Base, GetActiveGrade());
 	}
 
+	int GetActiveGrade() const noexcept
+	{
+		int ActiveGrade = 0;
+
+		// ActiveTypes is a bitmask of active types. Our active grade is
+		// basically how much active types we have currently
+		for (size_t i = 0; i < sizeof(decltype(ActiveTypes)) * 8; ++i)
+			ActiveGrade += ((1 << i) & ActiveTypes);
+		
+		return ActiveGrade;
+	}
 
 private:
 
-	void UpdateActiveEffect(const FGMBaseGesture& Gesture);
-
 	FStateBase Base;
 	
-	int ActiveGrade;
-	uint8_t ActiveType;
+	uint8_t ActiveTypes;
 
 };

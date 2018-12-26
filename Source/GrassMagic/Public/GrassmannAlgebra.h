@@ -76,7 +76,7 @@ FTrivector operator*(float Num, const FTrivector& T) noexcept;
 struct FGA
 {
 	// This represent number of dimension our Grassmann Algebra operates in
-	constexpr static int Dimension = 3;
+	constexpr static int Dimensions = 3;
 
 	enum class EBasis : int8_t
 	{

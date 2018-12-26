@@ -3,22 +3,28 @@
 #include "GMSpellState.h"
 
 
-void FGMSpellState::AddGesture(const FGMBaseGesture& Gesture)
+void FGMSpellState::AddEffect(const FVector& EffectValue, FGMBaseGesture::EType Type) noexcept
 {
+
+	int ActiveGrade = GetActiveGrade();
+
 	// Not sure about order of multiply here. For now will
 	// follow the rule OldValue ^ NewValue. But it might
-	// produce negative values so may be changedin future
+	// produce negative values so may be changed in future
 	switch (ActiveGrade)
 	{
 	case 0:
-		Base.Vector = Gesture.GetBase();
+		Base.Vector = EffectValue;
 		break;
 	case 1:
-		Base.Bivector = FGA::WedgeProduct(Base.Vector, Gesture.GetBase());
+		Base.Bivector = FGA::WedgeProduct(Base.Vector, EffectValue);
 		break;
 	case 2:
-		Base.Trivector = FGA::WedgeProduct(Base.Bivector, Gesture.GetBase());
+		Base.Trivector = FGA::WedgeProduct(Base.Bivector, EffectValue);
 	case 3:
+		// We need to make sure that this may happen only if we reach our dimensions amount.
+		// Because that's how Grassmann Algebra works
+		check(ActiveGrade == FGA::Dimensions);
 		Base.Scalar = 0;
 	default:
 		check(false);
@@ -26,20 +32,13 @@ void FGMSpellState::AddGesture(const FGMBaseGesture& Gesture)
 	}
 
 	// General routine for mixing gestures
-	if (ActiveGrade < FGA::Dimension)
+	if (ActiveGrade < FGA::Dimensions)
 	{
-		++ActiveGrade;
-		ActiveType = static_cast<uint8_t>(Gesture.GetDominantType()) |
-			static_cast<uint8_t>(ActiveType);
+		ActiveTypes = static_cast<uint8_t>(Type) |
+			static_cast<uint8_t>(ActiveTypes);
 	}
 	else
 	{
-		ActiveGrade = 0;
-		ActiveType = static_cast<uint8_t>(FGMBaseGesture::EType::None);
+		ActiveTypes = static_cast<uint8_t>(FGMBaseGesture::EType::None);
 	}
-}
-
-void FGMSpellState::UpdateActiveEffect(const FGMBaseGesture& Gesture)
-{
-
 }

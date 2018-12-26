@@ -12,7 +12,7 @@ class FGMBaseGesture
 {
 public:
 
-	enum class EType : int8_t
+	enum class EType : uint8_t
 	{
 		// Represents X axis
 		Damage = FGA::EBasis::E1,

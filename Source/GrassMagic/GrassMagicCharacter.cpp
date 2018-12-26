@@ -133,7 +133,7 @@ void AGrassMagicCharacter::MoveRight(float Value)
 
 void AGrassMagicCharacter::HandleDamageGesture(EInputEvent InputEvent)
 {
-
+	SpellComponent->HandleDamageGesture(InputEvent);
 }
 
 void AGrassMagicCharacter::HandleControlGesture(EInputEvent InputEvent)
@@ -148,5 +148,5 @@ void AGrassMagicCharacter::HandleChangeGesture(EInputEvent InputEvent)
 
 void AGrassMagicCharacter::AcquireResource(EInputEvent inputEvent)
 {
-	SpellComponent->HandleAcquireResourceInput(inputEvent);
+	SpellComponent->HandleAcquireResource(inputEvent);
 }

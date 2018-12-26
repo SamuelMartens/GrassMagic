@@ -27,7 +27,7 @@ public:
 private:
 
 	void StartGestureGeneric();
-	void StopGestureGeneric(FVector GestureVector);
+	void StopGestureGeneric(const FVector& GestureVector, FGMBaseGesture::EType Type);
 
 	FGMSpellState State;
 

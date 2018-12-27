@@ -21,11 +21,13 @@ void FGMSpellState::AddEffect(const FVector& EffectValue, FGMBaseGesture::EType 
 		break;
 	case 2:
 		Base.Trivector = FGA::WedgeProduct(Base.Bivector, EffectValue);
+		break;
 	case 3:
 		// We need to make sure that this may happen only if we reach our dimensions amount.
 		// Because that's how Grassmann Algebra works
 		check(ActiveGrade == FGA::Dimensions);
 		Base.Scalar = 0;
+		break;
 	default:
 		check(false);
 		break;

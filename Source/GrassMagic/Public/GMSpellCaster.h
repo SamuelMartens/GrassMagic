@@ -24,6 +24,12 @@ public:
 	void StartDamageGesture();
 	void StopDamageGesture();
 
+	void StartControlGesture();
+	void StopControlGesture();
+
+	void StartChangeGesture();
+	void StopChangeGesture();
+
 private:
 
 	void StartGestureGeneric();

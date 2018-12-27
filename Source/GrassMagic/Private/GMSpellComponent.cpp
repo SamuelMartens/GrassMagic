@@ -44,12 +44,14 @@ void UGMSpellComponent::HandleDamageGesture(EInputEvent Action)
 
 void UGMSpellComponent::HandleControlGesture(EInputEvent Action)
 {
-
+	HandleInputGeneric(Action, SpellCaster, &UGMSpellCaster::StartControlGesture,
+		&UGMSpellCaster::StopControlGesture, ESpellComponentCurrentAction::CastControlGesture);
 }
 
 void UGMSpellComponent::HandleChangeGesture(EInputEvent Action)
 {
-
+	HandleInputGeneric(Action, SpellCaster, &UGMSpellCaster::StartChangeGesture,
+		&UGMSpellCaster::StopChangeGesture, ESpellComponentCurrentAction::CastChangeGesture);
 }
 
 float UGMSpellComponent::AdjustMovement(float Value)

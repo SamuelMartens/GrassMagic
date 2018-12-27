@@ -21,6 +21,26 @@ void UGMSpellCaster::StopDamageGesture()
 	StopGestureGeneric(FGMDamageGesture::Inst().GetBase(), FGMDamageGesture::Inst().GetDominantType());
 }
 
+void UGMSpellCaster::StartControlGesture()
+{
+	StartGestureGeneric();
+}
+
+void UGMSpellCaster::StopControlGesture()
+{
+	StopGestureGeneric(FGMControlGesture::Inst().GetBase(), FGMControlGesture::Inst().GetDominantType());
+}
+
+void UGMSpellCaster::StartChangeGesture()
+{
+	StartGestureGeneric();
+}
+
+void UGMSpellCaster::StopChangeGesture()
+{
+	StopGestureGeneric(FGMChangeGesture::Inst().GetBase(), FGMChangeGesture::Inst().GetDominantType());
+}
+
 void UGMSpellCaster::StartGestureGeneric()
 {
 	CastStartTime = FTimespan::FromSeconds(UGameplayStatics::GetRealTimeSeconds(Owner->GetWorld()));

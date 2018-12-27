@@ -83,8 +83,8 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	PlayerInputComponent->BindAction("ControlGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleControlGesture<IE_Pressed>);
 	PlayerInputComponent->BindAction("ControlGesture", IE_Released, this, &AGrassMagicCharacter::HandleControlGesture<IE_Released>);
 
-	PlayerInputComponent->BindAction("ChangeGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleControlGesture<IE_Pressed>);
-	PlayerInputComponent->BindAction("ChangeGesture", IE_Released, this, &AGrassMagicCharacter::HandleControlGesture<IE_Released>);
+	PlayerInputComponent->BindAction("ChangeGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleChangeGesture<IE_Pressed>);
+	PlayerInputComponent->BindAction("ChangeGesture", IE_Released, this, &AGrassMagicCharacter::HandleChangeGesture<IE_Released>);
 
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGrassMagicCharacter::MoveForward);
@@ -138,12 +138,12 @@ void AGrassMagicCharacter::HandleDamageGesture(EInputEvent InputEvent)
 
 void AGrassMagicCharacter::HandleControlGesture(EInputEvent InputEvent)
 {
-
+	SpellComponent->HandleControlGesture(InputEvent);
 }
 
 void AGrassMagicCharacter::HandleChangeGesture(EInputEvent InputEvent)
 {
-
+	SpellComponent->HandleChangeGesture(InputEvent);
 }
 
 void AGrassMagicCharacter::AcquireResource(EInputEvent inputEvent)

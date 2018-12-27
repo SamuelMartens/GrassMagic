@@ -2,13 +2,17 @@
 
 #pragma once
 
+#include <functional>
+
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GMSpellComponent.generated.h"
 
+DECLARE_DELEGATE(DelVoidVoid)
+
 
 UENUM(BlueprintType)
-enum class ESpellComponentState : uint8
+enum class ESpellComponentCurrentAction : uint8
 {
 	/* Misc States */
 	None UMETA(DisplayName = "None"),
@@ -27,15 +31,17 @@ class GRASSMAGIC_API UGMSpellComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	// Use UPROPERTY to avoid garbage collection of this object
-	UPROPERTY()
-	class UGMResourceAcquirer* ResAcq;
+	enum class EActionState : int8_t
+	{
+		Idle,
+		Prepare,
+		InProgress
+	};
 
-	// Use UPROPERTY to avoid garbage collection of this object
-	UPROPERTY()
-	class UGMSpellCaster* SpellCaster;
+	const static float Movement_Adjust_Rate;
+	const static float Movement_Adjust_Timer_Interval;
+	const static float Movement_Adjust_Cuttoff;
 
-	ESpellComponentState State;
 
 public:	
 
@@ -44,11 +50,11 @@ public:
 	~UGMSpellComponent() = default;
 
 	void Init(float ExpectedMovementInput);
+	float AdjustMovement(float Value);
+
 
 	/* Resource acquire interface */
 	void HandleAcquireResource(EInputEvent Action);
-
-	float AdjustMovementOnResourceAcquire(float Value) const;
 
 
 	/* Spell cast Interface */
@@ -60,5 +66,47 @@ public:
 	int GetResources() const;
 
 	UFUNCTION(BlueprintCallable, Category = "SpellSystem")
-	ESpellComponentState GetState() const noexcept { return State; };
+	ESpellComponentCurrentAction GetCurrentAction() const noexcept { return CurrentAction; };
+
+private:
+
+	template<typename T>
+	void HandleInputGeneric(EInputEvent InputAction, T* Component, 
+		void (T::*CallBackStart)(), void (T::*CallBackEnd)(), ESpellComponentCurrentAction ComponentAction)
+	{
+		check(Component);
+
+		if (InputAction == IE_Pressed)
+		{
+			CurrentActionState = EActionState::Prepare;
+			CurrentAction = ComponentAction;
+			PendingAction.BindUObject(Component, CallBackStart);
+		}
+		else
+		{
+			CurrentActionState = EActionState::Idle;
+			CurrentAction = ESpellComponentCurrentAction::None;
+			MovementOffset = 0.0f;
+			// Call end of input callback. God, please forgive me this ugly syntax
+			(Component->*(CallBackEnd))();
+		}
+	}
+
+	float Prepare(float InpurValue);
+
+	DelVoidVoid PendingAction;
+
+	// Use UPROPERTY to avoid garbage collection of this object
+	UPROPERTY()
+	class UGMResourceAcquirer* ResAcq;
+
+	// Use UPROPERTY to avoid garbage collection of this object
+	UPROPERTY()
+	class UGMSpellCaster* SpellCaster;
+
+	ESpellComponentCurrentAction CurrentAction;
+	EActionState CurrentActionState;
+
+	float MaximumMovmentInput;
+	float MovementOffset;
 };

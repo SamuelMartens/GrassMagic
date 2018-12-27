@@ -10,45 +10,26 @@ class GRASSMAGIC_API UGMResourceAcquirer : public UObject
 {
 	GENERATED_BODY()
 
-	enum class EState : int8_t
-	{
-		Idle,
-		Prepare,
-		InProgress
-	};
 
 	const static float Acquire_Tick;
 	const static float Acquire_Delay;
 	const static int Resource_Per_Tick = 1;
 
-	const static float Movement_Adjust_Rate;
-	const static float Movement_Adjust_Timer_Interval;
-	const static float Movement_Adjust_Cuttoff;
-
 public:
 
 	UGMResourceAcquirer();
 	~UGMResourceAcquirer() = default;
-
-	void Init(AActor* OwnerActor, float OwnerMovementExpectedInput);
+	void Init(AActor* OwnerActor);
 
 	void StartAcquire();
 	void StopAcquire();
 
 	int GetResources() const { return Resources; };
 
-	float AdjustMovement(float Value);
-
 private:
 
-	EState CurrentState;
-	
 	UFUNCTION()
 	void OnTickResourceAcquire();
-
-	float Prepare(float InpurValue);
-
-	float MaximumMovmentInput;
 
 	FTimerHandle TimerHandle_ResourceAcquire;
 
@@ -56,5 +37,5 @@ private:
 
 	TWeakObjectPtr<AActor> Owner;
 
-	float MovementOffset;
+
 };

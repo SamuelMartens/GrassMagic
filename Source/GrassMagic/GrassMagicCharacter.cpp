@@ -99,7 +99,7 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 void AGrassMagicCharacter::MoveForward(float Value)
 {
-	Value = SpellComponent->AdjustMovementOnResourceAcquire(Value);
+	Value = SpellComponent->AdjustMovement(Value);
 
 	if (Controller == NULL || Value == 0.0f)
 		return;
@@ -115,7 +115,7 @@ void AGrassMagicCharacter::MoveForward(float Value)
 
 void AGrassMagicCharacter::MoveRight(float Value)
 {
-	Value = SpellComponent->AdjustMovementOnResourceAcquire(Value);
+	Value = SpellComponent->AdjustMovement(Value);
 
 	if (Controller == NULL || Value == 0.0f)
 		return;

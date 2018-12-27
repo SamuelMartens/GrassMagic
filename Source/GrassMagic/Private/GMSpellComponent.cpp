@@ -1,47 +1,45 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "GMSpellComponent.h"
+
+#include "GameFramework/PawnMovementComponent.h"
 
 #include "GMResourceAcquirer.h"
 #include "GMSpellCaster.h"
 
-// This macros is here only to avoid boilerplate code
-#define  GM_HANDLE_INPUT_BODY(MethodName, CompName, MethodState)  check(CompName); \
-if (Action == IE_Pressed) \
-{ \
-	State = MethodState; \
-	CompName->Start##MethodName();\
-} \
-else \
-{ \
-	State = ESpellComponentState::None; \
-	CompName->Stop##MethodName(); \
-}
-	
+const float UGMSpellComponent::Movement_Adjust_Rate = 0.07f;
+const float UGMSpellComponent::Movement_Adjust_Timer_Interval = 1.0f;
+const float UGMSpellComponent::Movement_Adjust_Cuttoff = 0.1f;
+
 
 // Sets default values for this component's properties
-UGMSpellComponent::UGMSpellComponent()
+UGMSpellComponent::UGMSpellComponent() :
+	CurrentActionState(EActionState::Idle),
+	CurrentAction(ESpellComponentCurrentAction::None),
+	MovementOffset(0.0f),
+	MaximumMovmentInput(0.0f)
 {
 	ResAcq = NewObject<UGMResourceAcquirer>(this, UGMResourceAcquirer::StaticClass(), TEXT("ResourceAcquierer"));
 	SpellCaster = NewObject<UGMSpellCaster>(this, UGMSpellCaster::StaticClass(), TEXT("SpellCaster"));
-
-	State = ESpellComponentState::None;
 }
 
 void UGMSpellComponent::Init(float ExpectedMovementInput)
 {
-	ResAcq->Init(GetOwner(), ExpectedMovementInput);
+	ResAcq->Init(GetOwner());
 	SpellCaster->Init(GetOwner());
+
+	MaximumMovmentInput = ExpectedMovementInput;
 }
 
 void UGMSpellComponent::HandleAcquireResource(EInputEvent Action)
 {
-	GM_HANDLE_INPUT_BODY(Acquire, ResAcq, ESpellComponentState::AcquireResource)
+	HandleInputGeneric(Action, ResAcq, &UGMResourceAcquirer::StartAcquire,
+		&UGMResourceAcquirer::StopAcquire, ESpellComponentCurrentAction::AcquireResource);
 }
 
 void UGMSpellComponent::HandleDamageGesture(EInputEvent Action)
 {
-	GM_HANDLE_INPUT_BODY(DamageGesture, SpellCaster, ESpellComponentState::CastDamageGesture)
+	HandleInputGeneric(Action, SpellCaster, &UGMSpellCaster::StartDamageGesture,
+		&UGMSpellCaster::StopDamageGesture, ESpellComponentCurrentAction::CastDamageGesture);
 }
 
 void UGMSpellComponent::HandleControlGesture(EInputEvent Action)
@@ -54,15 +52,64 @@ void UGMSpellComponent::HandleChangeGesture(EInputEvent Action)
 
 }
 
-float UGMSpellComponent::AdjustMovementOnResourceAcquire(float Value) const
+float UGMSpellComponent::AdjustMovement(float Value)
 {
-	return ResAcq->AdjustMovement(Value);
+	switch (CurrentActionState)
+	{
+	case EActionState::Idle:
+		return Value;
+	case EActionState::Prepare:
+		return Prepare(Value);
+	case EActionState::InProgress:
+		return 0.0f;
+	default:
+		return Value;
+	}
 }
-
 
 
 int UGMSpellComponent::GetResources() const
 {
 	check(ResAcq);
 	return ResAcq->GetResources();
+}
+
+float UGMSpellComponent::Prepare(float InputValue)
+{
+	check(CurrentActionState == EActionState::Prepare);
+
+	APawn* PawnOwner = Cast<APawn>(GetOwner());
+
+	check(PawnOwner);
+
+	float AdjustedValue = 0.0f;
+
+	if (PawnOwner->GetMovementComponent()->GetLastInputVector().IsZero())
+		// We stand still, so don't move until we done cast
+		MovementOffset = MaximumMovmentInput;
+	else if (InputValue != 0.0)
+	{
+		const float AbsValue = FMath::Abs(InputValue);
+
+		MovementOffset = FMath::FInterpTo(MovementOffset, MaximumMovmentInput, Movement_Adjust_Timer_Interval, Movement_Adjust_Rate);
+		AdjustedValue = AbsValue - MovementOffset;
+
+		if (FMath::IsNearlyZero(AdjustedValue, Movement_Adjust_Cuttoff))
+		{
+			AdjustedValue = 0.0f;
+			MovementOffset = MaximumMovmentInput;
+		}
+	}
+
+	// If we don't move we can cast
+	if (MovementOffset >= MaximumMovmentInput)
+	{
+		CurrentActionState = EActionState::InProgress;
+
+		check(PendingAction.IsBound());
+		PendingAction.Execute();
+	}
+
+	return  InputValue > 0.0f ? AdjustedValue : -AdjustedValue;
+
 }

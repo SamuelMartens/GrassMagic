@@ -45,6 +45,7 @@ public:
 	
 	void AddEffect(const FVector& EffectValue, FGMBaseGesture::EType Type) noexcept;
 
+
 	std::tuple<FStateBase, int> GetState() const noexcept 
 	{ 
 		return std::make_tuple(Base, GetActiveGrade());
@@ -57,10 +58,12 @@ public:
 		// ActiveTypes is a bitmask of active types. Our active grade is
 		// basically how much active types we have currently
 		for (size_t i = 0; i < sizeof(decltype(ActiveTypes)) * 8; ++i)
-			ActiveGrade += ((1 << i) & ActiveTypes);
+			ActiveGrade += ((1 << i) & ActiveTypes) ? 1 : 0;
 		
 		return ActiveGrade;
 	}
+	
+	void Debug_PrintState() const;
 
 private:
 

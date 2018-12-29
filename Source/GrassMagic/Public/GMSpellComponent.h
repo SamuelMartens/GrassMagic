@@ -72,23 +72,28 @@ private:
 
 	template<typename T>
 	void HandleInputGeneric(EInputEvent InputAction, T* Component, 
-		void (T::*CallBackStart)(), void (T::*CallBackEnd)(), ESpellComponentCurrentAction ComponentAction)
+		void (T::*CallBackStart)(), void (T::*CallBackStop)(), ESpellComponentCurrentAction ComponentAction)
 	{
 		check(Component);
 
-		if (InputAction == IE_Pressed)
+		// We should not do few action in the same time. That's why we check current action state
+		if (InputAction == IE_Pressed && CurrentActionState == EActionState::Idle)
 		{
 			CurrentActionState = EActionState::Prepare;
 			CurrentAction = ComponentAction;
 			PendingAction.BindUObject(Component, CallBackStart);
 		}
-		else
+		// We react only on release if the same action that currently in progress got release command
+		else if (InputAction == IE_Released && ComponentAction == CurrentAction)
 		{
+			// At this point we should always some action in progress
+			check(CurrentActionState != EActionState::Idle);
+
 			CurrentActionState = EActionState::Idle;
 			CurrentAction = ESpellComponentCurrentAction::None;
 			MovementOffset = 0.0f;
 			// Call end of input callback. God, please forgive me this ugly syntax
-			(Component->*(CallBackEnd))();
+			(Component->*(CallBackStop))();
 		}
 	}
 

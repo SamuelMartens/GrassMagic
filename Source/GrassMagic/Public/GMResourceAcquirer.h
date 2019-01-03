@@ -24,7 +24,7 @@ public:
 	void StartAcquire();
 	void StopAcquire();
 
-	int GetResources() const { return Resources; };
+	int GetResources() const {  return Resources; };
 
 private:
 

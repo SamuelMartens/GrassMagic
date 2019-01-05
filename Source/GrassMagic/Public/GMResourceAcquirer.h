@@ -31,7 +31,7 @@ private:
 	UFUNCTION()
 	void OnTickResourceAcquire();
 
-	FTimerHandle TimerHandle_ResourceAcquire;
+	FTimerHandle TimerHandler_ResourceAcquire;
 
 	int Resources = 0;
 

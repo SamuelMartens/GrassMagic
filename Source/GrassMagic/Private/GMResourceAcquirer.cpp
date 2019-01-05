@@ -20,13 +20,13 @@ void UGMResourceAcquirer::Init(AActor* OwnerActor)
 void UGMResourceAcquirer::StartAcquire()
 {
 	// Set timer to start acquire
-	Owner->GetWorldTimerManager().SetTimer(TimerHandle_ResourceAcquire, this,
+	Owner->GetWorldTimerManager().SetTimer(TimerHandler_ResourceAcquire, this,
 		&UGMResourceAcquirer::OnTickResourceAcquire, Acquire_Tick, true, Acquire_Delay);
 }
 
 void UGMResourceAcquirer::StopAcquire()
 {
-	Owner->GetWorldTimerManager().ClearTimer(TimerHandle_ResourceAcquire);
+	Owner->GetWorldTimerManager().ClearTimer(TimerHandler_ResourceAcquire);
 }
 
 void UGMResourceAcquirer::OnTickResourceAcquire()

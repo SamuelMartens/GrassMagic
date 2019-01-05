@@ -86,6 +86,9 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	PlayerInputComponent->BindAction("ChangeGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleChangeGesture<IE_Pressed>);
 	PlayerInputComponent->BindAction("ChangeGesture", IE_Released, this, &AGrassMagicCharacter::HandleChangeGesture<IE_Released>);
 
+	// Spell Release
+	PlayerInputComponent->BindAction("ReleaseSpell", IE_Pressed, this, &AGrassMagicCharacter::HandleReleaseSpell<IE_Pressed>);
+	PlayerInputComponent->BindAction("ReleaseSpell", IE_Released, this, &AGrassMagicCharacter::HandleReleaseSpell<IE_Released>);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGrassMagicCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGrassMagicCharacter::MoveRight);
@@ -146,7 +149,12 @@ void AGrassMagicCharacter::HandleChangeGesture(EInputEvent InputEvent)
 	SpellComponent->HandleChangeGesture(InputEvent);
 }
 
-void AGrassMagicCharacter::AcquireResource(EInputEvent inputEvent)
+void AGrassMagicCharacter::HandleReleaseSpell(EInputEvent InputEvent)
+{
+	SpellComponent->HandleReleaseSpell(InputEvent);
+}
+
+void AGrassMagicCharacter::HandleAcquireResource(EInputEvent inputEvent)
 {
 	SpellComponent->HandleAcquireResource(inputEvent);
 }

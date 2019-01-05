@@ -21,7 +21,9 @@ enum class ESpellComponentCurrentAction : uint8
 	/* Spell Cast States */
 	CastDamageGesture UMETA(DisplayName = "Cast Damage Gesture"),
 	CastControlGesture UMETA(DisplayName = "Cast Control Gesture"),
-	CastChangeGesture UMETA(DisplayName = "Cast Change Gesture")
+	CastChangeGesture UMETA(DisplayName = "Cast Change Gesture"),
+	/* Spell Release States */
+	Release UMETA(DisplayName = "Release Spell")
 };
 
 
@@ -49,6 +51,8 @@ public:
 	UGMSpellComponent();
 	~UGMSpellComponent() = default;
 
+	void BeginPlay() override;
+
 	void Init(float ExpectedMovementInput);
 	float AdjustMovement(float Value);
 
@@ -61,12 +65,18 @@ public:
 	void HandleDamageGesture(EInputEvent Action);
 	void HandleControlGesture(EInputEvent Action);
 	void HandleChangeGesture(EInputEvent Action);
+
+	/* Spell release interface */
+	void HandleReleaseSpell(EInputEvent Action);
 	
 	UFUNCTION(BlueprintCallable, Category = "SpellSystem")
 	int GetResources() const;
 
 	UFUNCTION(BlueprintCallable, Category = "SpellSystem")
 	ESpellComponentCurrentAction GetCurrentAction() const noexcept { return CurrentAction; };
+
+	UFUNCTION(BlueprintCallable, Category = "SpellSystem")
+	float GetFocus() const;
 
 private:
 
@@ -108,6 +118,9 @@ private:
 	// Use UPROPERTY to avoid garbage collection of this object
 	UPROPERTY()
 	class UGMSpellCaster* SpellCaster;
+
+	UPROPERTY()
+	class UGMSpellReleaser* SpellReleaser;
 
 	ESpellComponentCurrentAction CurrentAction;
 	EActionState CurrentActionState;

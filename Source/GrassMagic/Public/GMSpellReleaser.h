@@ -13,12 +13,14 @@ class GRASSMAGIC_API UGMSpellReleaser : public UObject
 {
 	GENERATED_BODY()
 
-	const static float Focus_Min;
 	const static float Focus_Tick_Interva; 
 	const static float Focus_Tick_Increment;
 	const static float Focus_Tick_Decrement;
 
 public:
+
+	const static float Focus_Min;
+	const static float Focus_Max;
 
 	UGMSpellReleaser();
 	~UGMSpellReleaser();
@@ -29,6 +31,8 @@ public:
 	void StopRelease();
 	
 	float GetFocus() const noexcept { return Focus; }
+
+	void SetSpellProjectileBPType(TSubclassOf<class AGMSpellProjectile> NewBPProjectileClass);
 
 private:
 
@@ -43,4 +47,5 @@ private:
 
 	bool IsReleasingCurrently;
 	
+	TSubclassOf<AGMSpellProjectile> BPProjectileClass;
 };

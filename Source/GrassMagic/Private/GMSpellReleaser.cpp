@@ -2,9 +2,13 @@
 
 #include "GMSpellReleaser.h"
 
-const float UGMSpellReleaser::Focus_Min = 1.0f;
+#include "DrawDebugHelpers.h"
+#include "GMSpellProjectile.h"
+
+const float UGMSpellReleaser::Focus_Min = 0.0f;
+const float UGMSpellReleaser::Focus_Max = 1.5f;
 const float UGMSpellReleaser::Focus_Tick_Interva = 0.005f;
-const float UGMSpellReleaser::Focus_Tick_Increment = 0.005f;
+const float UGMSpellReleaser::Focus_Tick_Increment = 0.009f;
 const float UGMSpellReleaser::Focus_Tick_Decrement = 0.005f;
 
 UGMSpellReleaser::UGMSpellReleaser():
@@ -36,7 +40,24 @@ void UGMSpellReleaser::StartRelease()
 
 void UGMSpellReleaser::StopRelease()
 {
+	check(Owner.IsValid() && BPProjectileClass);
+
 	IsReleasingCurrently = false;
+
+	FVector CameraLocation;
+	FRotator CameraRotation;
+
+	Cast<APlayerController>(Cast<APawn>(Owner)->GetController())->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Instigator = Cast<APawn>(Owner);
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	Owner->GetWorld()->SpawnActor<AGMSpellProjectile>(BPProjectileClass, CameraLocation, CameraRotation, SpawnParams);
+}
+
+void UGMSpellReleaser::SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile> NewBPProjectileClass)
+{
+	BPProjectileClass = NewBPProjectileClass;
 }
 
 void UGMSpellReleaser::OnTickSpellRelease()
@@ -47,6 +68,8 @@ void UGMSpellReleaser::OnTickSpellRelease()
 	}
 	else
 	{
-		Focus = FMath::Max(Focus_Min, Focus - Focus_Tick_Decrement);	
+		Focus -= Focus_Tick_Decrement;
 	}
+
+	Focus = FMath::Clamp(Focus, Focus_Min, Focus_Max);
 }

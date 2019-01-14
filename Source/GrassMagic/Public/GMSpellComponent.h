@@ -26,19 +26,20 @@ enum class ESpellComponentCurrentAction : uint8
 	Release UMETA(DisplayName = "Release Spell")
 };
 
+UENUM(BlueprintType)
+enum class ESpellComponentActionState : uint8
+{
+	Idle UMETA(DisplayName = "Idle"),
+	Prepare UMETA(DisplayName = "Prepare"),
+	InProgress UMETA(DisplayName = "In Progress")
+};
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GRASSMAGIC_API UGMSpellComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
-	enum class EActionState : int8_t
-	{
-		Idle,
-		Prepare,
-		InProgress
-	};
 
 	const static float Movement_Adjust_Rate;
 	const static float Movement_Adjust_Timer_Interval;
@@ -69,14 +70,26 @@ public:
 	/* Spell release interface */
 	void HandleReleaseSpell(EInputEvent Action);
 	
-	UFUNCTION(BlueprintCallable, Category = "SpellSystem")
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	int GetResources() const;
 
-	UFUNCTION(BlueprintCallable, Category = "SpellSystem")
-	ESpellComponentCurrentAction GetCurrentAction() const noexcept { return CurrentAction; };
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	ESpellComponentCurrentAction GetCurrentAction() const noexcept { return CurrentAction; }
 
-	UFUNCTION(BlueprintCallable, Category = "SpellSystem")
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	ESpellComponentActionState GetCurrentActionState() const noexcept { return CurrentActionState; }
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	float GetFocus() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	float GetFocusMin() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	float GetFocusMax() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	void SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile> BPProjectileClass);
 
 private:
 
@@ -87,9 +100,9 @@ private:
 		check(Component);
 
 		// We should not do few action in the same time. That's why we check current action state
-		if (InputAction == IE_Pressed && CurrentActionState == EActionState::Idle)
+		if (InputAction == IE_Pressed && CurrentActionState == ESpellComponentActionState::Idle)
 		{
-			CurrentActionState = EActionState::Prepare;
+			CurrentActionState = ESpellComponentActionState::Prepare;
 			CurrentAction = ComponentAction;
 			PendingAction.BindUObject(Component, CallBackStart);
 		}
@@ -97,9 +110,9 @@ private:
 		else if (InputAction == IE_Released && ComponentAction == CurrentAction)
 		{
 			// At this point we should always some action in progress
-			check(CurrentActionState != EActionState::Idle);
+			check(CurrentActionState != ESpellComponentActionState::Idle);
 
-			CurrentActionState = EActionState::Idle;
+			CurrentActionState = ESpellComponentActionState::Idle;
 			CurrentAction = ESpellComponentCurrentAction::None;
 			MovementOffset = 0.0f;
 			// Call end of input callback. God, please forgive me this ugly syntax
@@ -122,8 +135,12 @@ private:
 	UPROPERTY()
 	class UGMSpellReleaser* SpellReleaser;
 
+	//#DEBUG
+	/*UPROPERTY(EditDefaultsOnly, Category = "Native Setting", meta=(DisplayName="Blueprint Projectile Class"))
+	const TSubclassOf<AGMSpellProjectile> BPProjectileClass;*/
+
 	ESpellComponentCurrentAction CurrentAction;
-	EActionState CurrentActionState;
+	ESpellComponentActionState CurrentActionState;
 
 	float MaximumMovmentInput;
 	float MovementOffset;

@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "GMInputHandlerGeneric.h"
+
 #include "GMResourceAcquirer.generated.h"
 
 UCLASS()
@@ -17,9 +20,10 @@ class GRASSMAGIC_API UGMResourceAcquirer : public UObject
 
 public:
 
-	UGMResourceAcquirer();
+	UGMResourceAcquirer() = default;
 	~UGMResourceAcquirer() = default;
-	void Init(AActor* OwnerActor);
+
+	void SetGenericInputHandler(FGMInputHandlerGeneric NewGenHandler) { GenHandler = NewGenHandler;}
 
 	void StartAcquire();
 	void StopAcquire();
@@ -35,7 +39,5 @@ private:
 
 	int Resources = 0;
 
-	TWeakObjectPtr<AActor> Owner;
-
-
+	FGMInputHandlerGeneric GenHandler;
 };

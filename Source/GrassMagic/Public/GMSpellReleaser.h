@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "GMInputHandlerGeneric.h"
+
 #include "GMSpellReleaser.generated.h"
 
 /**
@@ -25,7 +28,8 @@ public:
 	UGMSpellReleaser();
 	~UGMSpellReleaser();
 
-	void Init(AActor* OwnerActor);
+	void Init(FGMInputHandlerGeneric NewGenHandler);
+	void SetGenericInputHandler(FGMInputHandlerGeneric NewGenHandler) { GenHandler = NewGenHandler; }
 
 	void StartRelease();
 	void StopRelease();
@@ -43,9 +47,9 @@ private:
 
 	float Focus;
 
-	TWeakObjectPtr<AActor> Owner;
-
 	bool IsReleasingCurrently;
 	
 	TSubclassOf<AGMSpellProjectile> BPProjectileClass;
+
+	FGMInputHandlerGeneric GenHandler;
 };

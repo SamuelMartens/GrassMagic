@@ -6,6 +6,7 @@
 #include "GMResourceAcquirer.h"
 #include "GMSpellCaster.h"
 #include "GMSpellReleaser.h"
+#include "GMInputHandlerGeneric.h"
 
 const float UGMSpellComponent::Movement_Adjust_Rate = 0.07f;
 const float UGMSpellComponent::Movement_Adjust_Timer_Interval = 1.0f;
@@ -31,65 +32,65 @@ void UGMSpellComponent::BeginPlay()
 
 void UGMSpellComponent::Init(float ExpectedMovementInput)
 {
-	
-	ResAcq->Init(GetOwner());
-	SpellCaster->Init(GetOwner());
-	SpellReleaser->Init(GetOwner());
+	FGMInputHandlerGeneric GenHandler;
+	GenHandler.Init(Cast<APawn>(GetOwner()), this, &UGMSpellComponent::GenericInputRelease);
+
+	SpellReleaser->Init(GenHandler);
+
+	ResAcq->SetGenericInputHandler(GenHandler);
+	SpellCaster->SetGenericInputHandler(GenHandler);
 
 	MaximumMovmentInput = ExpectedMovementInput;
 }
 
-void UGMSpellComponent::HandleAcquireResource(EInputEvent Action)
+void UGMSpellComponent::HandleAcquireResource_Pressed()
 {
-	HandleInputGeneric(Action, ResAcq, &UGMResourceAcquirer::StartAcquire,
-		&UGMResourceAcquirer::StopAcquire, ESpellComponentCurrentAction::AcquireResource);
+	HandleInputGeneric_Pressed(ResAcq, &UGMResourceAcquirer::StartAcquire, ESpellComponentCurrentAction::AcquireResource);
 }
 
-void UGMSpellComponent::HandleDamageGesture(EInputEvent Action)
+void UGMSpellComponent::HandleAcquireResource_Released()
 {
-	HandleInputGeneric(Action, SpellCaster, &UGMSpellCaster::StartDamageGesture,
-		&UGMSpellCaster::StopDamageGesture, ESpellComponentCurrentAction::CastDamageGesture);
+	HandleInputGeneric_Released(ResAcq, &UGMResourceAcquirer::StopAcquire, ESpellComponentCurrentAction::AcquireResource);
 }
 
-void UGMSpellComponent::HandleControlGesture(EInputEvent Action)
+void UGMSpellComponent::HandleDamageGesture_Pressed()
 {
-	HandleInputGeneric(Action, SpellCaster, &UGMSpellCaster::StartControlGesture,
-		&UGMSpellCaster::StopControlGesture, ESpellComponentCurrentAction::CastControlGesture);
+	HandleInputGeneric_Pressed(SpellCaster, &UGMSpellCaster::StartDamageGesture, ESpellComponentCurrentAction::CastDamageGesture);
 }
 
-void UGMSpellComponent::HandleChangeGesture(EInputEvent Action)
+void UGMSpellComponent::HandleDamageGesture_Released()
 {
-	HandleInputGeneric(Action, SpellCaster, &UGMSpellCaster::StartChangeGesture,
-		&UGMSpellCaster::StopChangeGesture, ESpellComponentCurrentAction::CastChangeGesture);
+	HandleInputGeneric_Released(SpellCaster, &UGMSpellCaster::StopDamageGesture, ESpellComponentCurrentAction::CastDamageGesture);
 }
 
-void UGMSpellComponent::HandleReleaseSpell(EInputEvent Action)
+void UGMSpellComponent::HandleControlGesture_Pressed()
 {
-	//#DEBUG
-	// This code will draw debug line on spell cast
-	//FVector EyeLocation;
-	//FRotator EyeRotation;
-	//Cast<APlayerController>(Cast<APawn>(GetOwner())->GetController())->PlayerCameraManager->GetCameraViewPoint(EyeLocation, EyeRotation);
+	HandleInputGeneric_Pressed(SpellCaster, &UGMSpellCaster::StartControlGesture, ESpellComponentCurrentAction::CastControlGesture);
+}
 
-	/*
-	Before cast check where camera line hit robust object and then from launch point to this point cast projectile
-	
-	*/
+void UGMSpellComponent::HandleControlGesture_Released()
+{
+	HandleInputGeneric_Released(SpellCaster, &UGMSpellCaster::StopControlGesture, ESpellComponentCurrentAction::CastControlGesture);
+}
 
-	//FVector CastDir = EyeRotation.Vector();
+void UGMSpellComponent::HandleChangeGesture_Pressed()
+{
+	HandleInputGeneric_Pressed(SpellCaster, &UGMSpellCaster::StartChangeGesture, ESpellComponentCurrentAction::CastChangeGesture);
+}
 
-	//FVector TraceEnd = EyeLocation + CastDir * 10000;
+void UGMSpellComponent::HandleChangeGesture_Released()
+{
+	HandleInputGeneric_Released(SpellCaster, &UGMSpellCaster::StopChangeGesture, ESpellComponentCurrentAction::CastChangeGesture);
+}
 
-	//DrawDebugLine(GetOwner()->GetWorld(), EyeLocation, TraceEnd, FColor::Red, false, 1.0, 0, 1.0);
-	/*FActorSpawnParameters SpawnParams;
-	SpawnParams.Instigator = Cast<APawn> (GetOwner());*/
-	// Rewrite this properly
-	/*SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	GetOwner()->GetWorld()->SpawnActor<AGMSpellProjectile>(BPProjectileClass, EyeLocation + 100 * EyeRotation.Vector(), EyeRotation, SpawnParams);*/
-	//END
+void UGMSpellComponent::HandleReleaseSpell_Pressed()
+{
+	HandleInputGeneric_Pressed(SpellReleaser, &UGMSpellReleaser::StartRelease, ESpellComponentCurrentAction::Release);
+}
 
-	HandleInputGeneric(Action, SpellReleaser, &UGMSpellReleaser::StartRelease,
-		&UGMSpellReleaser::StopRelease, ESpellComponentCurrentAction::Release);
+void UGMSpellComponent::HandleReleaseSpell_Released()
+{
+	HandleInputGeneric_Released(SpellReleaser, &UGMSpellReleaser::StopRelease, ESpellComponentCurrentAction::Release);
 }
 
 float UGMSpellComponent::AdjustMovement(float Value)
@@ -107,6 +108,16 @@ float UGMSpellComponent::AdjustMovement(float Value)
 	}
 }
 
+
+void UGMSpellComponent::GenericInputRelease()
+{
+	// At this point we should always some action in progress
+	check(CurrentActionState != ESpellComponentActionState::Idle);
+
+	CurrentActionState = ESpellComponentActionState::Idle;
+	CurrentAction = ESpellComponentCurrentAction::None;
+	MovementOffset = 0.0f;
+}
 
 int UGMSpellComponent::GetResources() const
 {

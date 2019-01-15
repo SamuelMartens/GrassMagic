@@ -26,14 +26,6 @@ class AGrassMagicCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SpellSystem, meta = (AllowPrivateAccess = "true"))
 	class UGMSpellComponent* SpellComponent;
 
-	void HandleAcquireResource(EInputEvent InputEvent);
-
-	void HandleDamageGesture(EInputEvent InputEvent);
-	void HandleControlGesture(EInputEvent InputEvent);
-	void HandleChangeGesture(EInputEvent InputEvent);
-
-	void HandleReleaseSpell(EInputEvent InputEvent);
-
 public:
 	AGrassMagicCharacter();
 
@@ -51,21 +43,6 @@ protected:
 
 	/** Called for side to side input */
 	void MoveRight(float Value);
-
-	template<EInputEvent InputEvent> 
-	void AcquireResources() { HandleAcquireResource(InputEvent); }
-
-	template<EInputEvent InputEvent>
-	void HandleDamageGesture() { HandleDamageGesture(InputEvent); }
-
-	template<EInputEvent InputEvent>
-	void HandleControlGesture() { HandleControlGesture(InputEvent); }
-
-	template<EInputEvent InputEvent>
-	void HandleChangeGesture() { HandleChangeGesture(InputEvent); }
-
-	template<EInputEvent InputEvent>
-	void HandleReleaseSpell() { HandleReleaseSpell(InputEvent); }
 
 	void BeginPlay() override;
 

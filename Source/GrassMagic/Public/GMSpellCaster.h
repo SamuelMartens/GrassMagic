@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 #include "GMSpellState.h"
 
+#include "GMInputHandlerGeneric.h"
+
 #include "GMSpellCaster.generated.h"
 
 UCLASS()
@@ -19,7 +21,7 @@ public:
 	UGMSpellCaster(): CastStartTime(0.0f)
 	{}
 
-	void Init(AActor* OwnerActor);
+	void SetGenericInputHandler(FGMInputHandlerGeneric NewGenHandler) { GenHandler = NewGenHandler; }
 
 	void StartDamageGesture();
 	void StopDamageGesture();
@@ -39,9 +41,9 @@ private:
 
 	FGMSpellState State;
 
-	TWeakObjectPtr<AActor> Owner;
-
 	FTimespan CastStartTime;
+
+	FGMInputHandlerGeneric GenHandler;
 
 	UFUNCTION()
 	void Debug_OnTickInfo() const;

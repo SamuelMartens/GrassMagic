@@ -12,24 +12,21 @@ const float UGMSpellReleaser::Focus_Tick_Increment = 0.009f;
 const float UGMSpellReleaser::Focus_Tick_Decrement = 0.005f;
 
 UGMSpellReleaser::UGMSpellReleaser():
-	Owner(nullptr),
 	Focus(Focus_Min),
 	IsReleasingCurrently(false)
 {}
 
 UGMSpellReleaser::~UGMSpellReleaser()
 {
-	if (Owner.IsValid())
-		Owner->GetWorldTimerManager().ClearTimer(TimerHandler_Release);
+	if (GenHandler.GerOwner().IsValid())
+		GenHandler.GerOwner()->GetWorldTimerManager().ClearTimer(TimerHandler_Release);
 }
 
-void UGMSpellReleaser::Init(AActor* OwnerActor)
+void UGMSpellReleaser::Init(FGMInputHandlerGeneric NewGenHandler)
 {
-	check(OwnerActor);
-
-	Owner = OwnerActor;
+	GenHandler = NewGenHandler;
 	
-	Owner->GetWorldTimerManager().SetTimer(TimerHandler_Release, this, 
+	GenHandler.GerOwner()->GetWorldTimerManager().SetTimer(TimerHandler_Release, this, 
 		&UGMSpellReleaser::OnTickSpellRelease, Focus_Tick_Interva, true);
 }
 
@@ -40,19 +37,21 @@ void UGMSpellReleaser::StartRelease()
 
 void UGMSpellReleaser::StopRelease()
 {
-	check(Owner.IsValid() && BPProjectileClass);
+	check(GenHandler.GerOwner().IsValid() && BPProjectileClass);
 
 	IsReleasingCurrently = false;
 
 	FVector CameraLocation;
 	FRotator CameraRotation;
 
-	Cast<APlayerController>(Cast<APawn>(Owner)->GetController())->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+	Cast<APlayerController>(GenHandler.GerOwner()->GetController())->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
 	
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.Instigator = Cast<APawn>(Owner);
+	SpawnParams.Instigator = GenHandler.GerOwner().Get();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	Owner->GetWorld()->SpawnActor<AGMSpellProjectile>(BPProjectileClass, CameraLocation, CameraRotation, SpawnParams);
+	GenHandler.GerOwner()->GetWorld()->SpawnActor<AGMSpellProjectile>(BPProjectileClass, CameraLocation, CameraRotation, SpawnParams);
+
+	GenHandler.ExecuteReleaseCallBack();
 }
 
 void UGMSpellReleaser::SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile> NewBPProjectileClass)

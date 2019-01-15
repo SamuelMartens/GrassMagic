@@ -5,28 +5,18 @@
 const float UGMResourceAcquirer::Acquire_Tick = 0.15f;
 const float UGMResourceAcquirer::Acquire_Delay = 0.35f;
 
-
-UGMResourceAcquirer::UGMResourceAcquirer():
-	Owner(nullptr)
-{}
-
-
-void UGMResourceAcquirer::Init(AActor* OwnerActor)
-{
-	check(OwnerActor);
-	Owner = OwnerActor;
-}
-
 void UGMResourceAcquirer::StartAcquire()
 {
 	// Set timer to start acquire
-	Owner->GetWorldTimerManager().SetTimer(TimerHandler_ResourceAcquire, this,
+	GenHandler.GerOwner()->GetWorldTimerManager().SetTimer(TimerHandler_ResourceAcquire, this,
 		&UGMResourceAcquirer::OnTickResourceAcquire, Acquire_Tick, true, Acquire_Delay);
 }
 
 void UGMResourceAcquirer::StopAcquire()
 {
-	Owner->GetWorldTimerManager().ClearTimer(TimerHandler_ResourceAcquire);
+	GenHandler.GerOwner()->GetWorldTimerManager().ClearTimer(TimerHandler_ResourceAcquire);
+
+	GenHandler.ExecuteReleaseCallBack();
 }
 
 void UGMResourceAcquirer::OnTickResourceAcquire()

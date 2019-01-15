@@ -6,9 +6,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GMSpellComponent.generated.h"
 
-DECLARE_DELEGATE(DelVoidVoid)
+#include "GrassMagic.h"
+
+#include "GMSpellComponent.generated.h"
 
 
 UENUM(BlueprintType)
@@ -57,18 +58,27 @@ public:
 	void Init(float ExpectedMovementInput);
 	float AdjustMovement(float Value);
 
+	// This function must be called in the end of any Input release Sequence
+	void GenericInputRelease();
 
 	/* Resource acquire interface */
-	void HandleAcquireResource(EInputEvent Action);
+	void HandleAcquireResource_Pressed();
+	void HandleAcquireResource_Released();
 
 
 	/* Spell cast Interface */
-	void HandleDamageGesture(EInputEvent Action);
-	void HandleControlGesture(EInputEvent Action);
-	void HandleChangeGesture(EInputEvent Action);
+	void HandleDamageGesture_Pressed();
+	void HandleDamageGesture_Released();
+
+	void HandleControlGesture_Pressed();
+	void HandleControlGesture_Released();
+
+	void HandleChangeGesture_Pressed();
+	void HandleChangeGesture_Released();
 
 	/* Spell release interface */
-	void HandleReleaseSpell(EInputEvent Action);
+	void HandleReleaseSpell_Pressed();
+	void HandleReleaseSpell_Released();
 	
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	int GetResources() const;
@@ -91,33 +101,35 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	void SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile> BPProjectileClass);
 
+
+
 private:
 
 	template<typename T>
-	void HandleInputGeneric(EInputEvent InputAction, T* Component, 
-		void (T::*CallBackStart)(), void (T::*CallBackStop)(), ESpellComponentCurrentAction ComponentAction)
+	void HandleInputGeneric_Pressed( T* Component, void (T::*CallBackStart)(), ESpellComponentCurrentAction ComponentAction)
+	{
+		check(Component);
+		
+		// We should not do few action in the same time. That's why we check current action state
+		if (CurrentActionState != ESpellComponentActionState::Idle)
+			return;
+
+		CurrentActionState = ESpellComponentActionState::Prepare;
+		CurrentAction = ComponentAction;
+		PendingAction.BindUObject(Component, CallBackStart);
+	}
+
+	template<typename T>
+	void HandleInputGeneric_Released(T* Component, void (T::*CallBackStop)(), ESpellComponentCurrentAction ComponentAction)
 	{
 		check(Component);
 
-		// We should not do few action in the same time. That's why we check current action state
-		if (InputAction == IE_Pressed && CurrentActionState == ESpellComponentActionState::Idle)
-		{
-			CurrentActionState = ESpellComponentActionState::Prepare;
-			CurrentAction = ComponentAction;
-			PendingAction.BindUObject(Component, CallBackStart);
-		}
 		// We react only on release if the same action that currently in progress got release command
-		else if (InputAction == IE_Released && ComponentAction == CurrentAction)
-		{
-			// At this point we should always some action in progress
-			check(CurrentActionState != ESpellComponentActionState::Idle);
+		if (ComponentAction != CurrentAction)
+			return;
 
-			CurrentActionState = ESpellComponentActionState::Idle;
-			CurrentAction = ESpellComponentCurrentAction::None;
-			MovementOffset = 0.0f;
-			// Call end of input callback. God, please forgive me this ugly syntax
-			(Component->*(CallBackStop))();
-		}
+		// Call end of input callback. God, please forgive me this ugly syntax
+		(Component->*(CallBackStop))();
 	}
 
 	float Prepare(float InpurValue);
@@ -134,10 +146,6 @@ private:
 
 	UPROPERTY()
 	class UGMSpellReleaser* SpellReleaser;
-
-	//#DEBUG
-	/*UPROPERTY(EditDefaultsOnly, Category = "Native Setting", meta=(DisplayName="Blueprint Projectile Class"))
-	const TSubclassOf<AGMSpellProjectile> BPProjectileClass;*/
 
 	ESpellComponentCurrentAction CurrentAction;
 	ESpellComponentActionState CurrentActionState;

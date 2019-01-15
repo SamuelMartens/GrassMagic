@@ -14,13 +14,6 @@ const float UGMSpellCaster::Debug_Info_Tick_Interval = 0.15f;
 
 #endif
 
-
-void UGMSpellCaster::Init(AActor* OwnerActor)
-{
-	check(OwnerActor);
-	Owner = OwnerActor;
-}
-
 void UGMSpellCaster::StartDamageGesture()
 {
 #if !UE_BUILD_SHIPPING
@@ -65,10 +58,10 @@ void UGMSpellCaster::StopChangeGesture()
 
 void UGMSpellCaster::StartGestureGeneric()
 {
-	CastStartTime = FTimespan::FromSeconds(UGameplayStatics::GetRealTimeSeconds(Owner->GetWorld()));
+	CastStartTime = FTimespan::FromSeconds(UGameplayStatics::GetRealTimeSeconds(GenHandler.GerOwner()->GetWorld()));
 
 #if !UE_BUILD_SHIPPING
-	Owner->GetWorldTimerManager().SetTimer(Debug_TimerHandle_Info, this, &UGMSpellCaster::Debug_OnTickInfo, Debug_Info_Tick_Interval, true);
+	GenHandler.GerOwner()->GetWorldTimerManager().SetTimer(Debug_TimerHandle_Info, this, &UGMSpellCaster::Debug_OnTickInfo, Debug_Info_Tick_Interval, true);
 #endif
 }
 
@@ -77,14 +70,16 @@ void UGMSpellCaster::StopGestureGeneric(const FVector& GestureVector, FGMBaseGes
 	const FVector ScaledGestureVector = GestureVector * GetCastDurationMilliseconds() * Cast_Time_Scale_Coefficient;
 	State.AddEffect(ScaledGestureVector, Type);
 
+	GenHandler.ExecuteReleaseCallBack();
+
 #if !UE_BUILD_SHIPPING
-	Owner->GetWorldTimerManager().ClearTimer(Debug_TimerHandle_Info);
+	GenHandler.GerOwner()->GetWorldTimerManager().ClearTimer(Debug_TimerHandle_Info);
 #endif
 }
 
 double UGMSpellCaster::GetCastDurationMilliseconds() const
 {
-	return (FTimespan::FromSeconds(UGameplayStatics::GetRealTimeSeconds(Owner->GetWorld())) - CastStartTime).GetTotalMicroseconds();
+	return (FTimespan::FromSeconds(UGameplayStatics::GetRealTimeSeconds(GenHandler.GerOwner()->GetWorld())) - CastStartTime).GetTotalMicroseconds();
 }
 
 void UGMSpellCaster::Debug_OnTickInfo() const

@@ -73,22 +73,22 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	// Resources
-	PlayerInputComponent->BindAction("AcquireResources", IE_Pressed, this, &AGrassMagicCharacter::AcquireResources<IE_Pressed>);
-	PlayerInputComponent->BindAction("AcquireResources", IE_Released, this, &AGrassMagicCharacter::AcquireResources<IE_Released>);
+	PlayerInputComponent->BindAction("AcquireResources", IE_Pressed, SpellComponent, &UGMSpellComponent::HandleAcquireResource_Pressed);
+	PlayerInputComponent->BindAction("AcquireResources", IE_Released, SpellComponent, &UGMSpellComponent::HandleAcquireResource_Released);
 
 	// Gestures
-	PlayerInputComponent->BindAction("DamageGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleDamageGesture<IE_Pressed>);
-	PlayerInputComponent->BindAction("DamageGesture", IE_Released, this, &AGrassMagicCharacter::HandleDamageGesture<IE_Released>);
+	PlayerInputComponent->BindAction("DamageGesture", IE_Pressed, SpellComponent, &UGMSpellComponent::HandleDamageGesture_Pressed);
+	PlayerInputComponent->BindAction("DamageGesture", IE_Released, SpellComponent, &UGMSpellComponent::HandleDamageGesture_Released);
 
-	PlayerInputComponent->BindAction("ControlGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleControlGesture<IE_Pressed>);
-	PlayerInputComponent->BindAction("ControlGesture", IE_Released, this, &AGrassMagicCharacter::HandleControlGesture<IE_Released>);
+	PlayerInputComponent->BindAction("ControlGesture", IE_Pressed, SpellComponent, &UGMSpellComponent::HandleControlGesture_Pressed);
+	PlayerInputComponent->BindAction("ControlGesture", IE_Released, SpellComponent, &UGMSpellComponent::HandleControlGesture_Released);
 
-	PlayerInputComponent->BindAction("ChangeGesture", IE_Pressed, this, &AGrassMagicCharacter::HandleChangeGesture<IE_Pressed>);
-	PlayerInputComponent->BindAction("ChangeGesture", IE_Released, this, &AGrassMagicCharacter::HandleChangeGesture<IE_Released>);
+	PlayerInputComponent->BindAction("ChangeGesture", IE_Pressed, SpellComponent, &UGMSpellComponent::HandleChangeGesture_Pressed);
+	PlayerInputComponent->BindAction("ChangeGesture", IE_Released, SpellComponent, &UGMSpellComponent::HandleChangeGesture_Released);
 
 	// Spell Release
-	PlayerInputComponent->BindAction("ReleaseSpell", IE_Pressed, this, &AGrassMagicCharacter::HandleReleaseSpell<IE_Pressed>);
-	PlayerInputComponent->BindAction("ReleaseSpell", IE_Released, this, &AGrassMagicCharacter::HandleReleaseSpell<IE_Released>);
+	PlayerInputComponent->BindAction("ReleaseSpell", IE_Pressed, SpellComponent, &UGMSpellComponent::HandleReleaseSpell_Pressed);
+	PlayerInputComponent->BindAction("ReleaseSpell", IE_Released, SpellComponent, &UGMSpellComponent::HandleReleaseSpell_Released);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGrassMagicCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGrassMagicCharacter::MoveRight);
@@ -132,29 +132,4 @@ void AGrassMagicCharacter::MoveRight(float Value)
 	// add movement in that direction
 	
 	AddMovementInput(Direction, Value);
-}
-
-void AGrassMagicCharacter::HandleDamageGesture(EInputEvent InputEvent)
-{
-	SpellComponent->HandleDamageGesture(InputEvent);
-}
-
-void AGrassMagicCharacter::HandleControlGesture(EInputEvent InputEvent)
-{
-	SpellComponent->HandleControlGesture(InputEvent);
-}
-
-void AGrassMagicCharacter::HandleChangeGesture(EInputEvent InputEvent)
-{
-	SpellComponent->HandleChangeGesture(InputEvent);
-}
-
-void AGrassMagicCharacter::HandleReleaseSpell(EInputEvent InputEvent)
-{
-	SpellComponent->HandleReleaseSpell(InputEvent);
-}
-
-void AGrassMagicCharacter::HandleAcquireResource(EInputEvent inputEvent)
-{
-	SpellComponent->HandleAcquireResource(inputEvent);
 }

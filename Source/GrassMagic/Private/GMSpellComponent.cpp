@@ -85,12 +85,12 @@ void UGMSpellComponent::HandleChangeGesture_Released()
 
 void UGMSpellComponent::HandleReleaseSpell_Pressed()
 {
-	HandleInputGeneric_Pressed(SpellReleaser, &UGMSpellReleaser::StartRelease, ESpellComponentCurrentAction::Release);
+	HandleInputGeneric_Pressed(SpellReleaser, &UGMSpellReleaser::StartRelease, ESpellComponentCurrentAction::Focus);
 }
 
 void UGMSpellComponent::HandleReleaseSpell_Released()
 {
-	HandleInputGeneric_Released(SpellReleaser, &UGMSpellReleaser::StopRelease, ESpellComponentCurrentAction::Release);
+	HandleInputGeneric_Released(SpellReleaser, &UGMSpellReleaser::StopRelease, ESpellComponentCurrentAction::Focus);
 }
 
 float UGMSpellComponent::AdjustMovement(float Value)
@@ -146,6 +146,13 @@ void UGMSpellComponent::SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile>
 	check(SpellReleaser);
 	
     SpellReleaser->SetSpellProjectileBPType(BPProjectileClass);
+}
+
+void UGMSpellComponent::SpawnProjectile()
+{
+	check(SpellReleaser);
+
+	SpellReleaser->SpawnProjectile();
 }
 
 float UGMSpellComponent::Prepare(float InputValue)

@@ -38,6 +38,8 @@ public:
 
 	void SetSpellProjectileBPType(TSubclassOf<class AGMSpellProjectile> NewBPProjectileClass);
 
+	void SpawnProjectile();
+
 private:
 
 	UFUNCTION()

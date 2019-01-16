@@ -4,6 +4,7 @@
 
 #include "DrawDebugHelpers.h"
 #include "GMSpellProjectile.h"
+#include "GMSpellComponent.h"
 
 const float UGMSpellReleaser::Focus_Min = 0.0f;
 const float UGMSpellReleaser::Focus_Max = 1.5f;
@@ -25,7 +26,6 @@ UGMSpellReleaser::~UGMSpellReleaser()
 void UGMSpellReleaser::Init(FGMInputHandlerGeneric NewGenHandler)
 {
 	GenHandler = NewGenHandler;
-	
 	GenHandler.GerOwner()->GetWorldTimerManager().SetTimer(TimerHandler_Release, this, 
 		&UGMSpellReleaser::OnTickSpellRelease, Focus_Tick_Interva, true);
 }
@@ -41,22 +41,27 @@ void UGMSpellReleaser::StopRelease()
 
 	IsReleasingCurrently = false;
 
-	FVector CameraLocation;
-	FRotator CameraRotation;
-
-	Cast<APlayerController>(GenHandler.GerOwner()->GetController())->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
-	
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Instigator = GenHandler.GerOwner().Get();
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	GenHandler.GerOwner()->GetWorld()->SpawnActor<AGMSpellProjectile>(BPProjectileClass, CameraLocation, CameraRotation, SpawnParams);
-
-	GenHandler.ExecuteReleaseCallBack();
+	 UGMSpellComponent* SpellComp = Cast<UGMSpellComponent>(GenHandler.GerOwner()->GetComponentByClass(UGMSpellComponent::StaticClass()));
+	 check(SpellComp);
+	 SpellComp->CurrentAction = ESpellComponentCurrentAction::Release;
 }
 
 void UGMSpellReleaser::SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile> NewBPProjectileClass)
 {
 	BPProjectileClass = NewBPProjectileClass;
+}
+
+void UGMSpellReleaser::SpawnProjectile()
+{
+	FVector CameraLocation;
+	FRotator CameraRotation;
+
+	Cast<APlayerController>(GenHandler.GerOwner()->GetController())->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Instigator = GenHandler.GerOwner().Get();
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GenHandler.GerOwner()->GetWorld()->SpawnActor<AGMSpellProjectile>(BPProjectileClass, CameraLocation, CameraRotation, SpawnParams);
 }
 
 void UGMSpellReleaser::OnTickSpellRelease()

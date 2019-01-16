@@ -23,7 +23,9 @@ enum class ESpellComponentCurrentAction : uint8
 	CastDamageGesture UMETA(DisplayName = "Cast Damage Gesture"),
 	CastControlGesture UMETA(DisplayName = "Cast Control Gesture"),
 	CastChangeGesture UMETA(DisplayName = "Cast Change Gesture"),
+	
 	/* Spell Release States */
+	Focus UMETA(DisplayName = "Focus Spell"),
 	Release UMETA(DisplayName = "Release Spell")
 };
 
@@ -59,6 +61,7 @@ public:
 	float AdjustMovement(float Value);
 
 	// This function must be called in the end of any Input release Sequence
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	void GenericInputRelease();
 
 	/* Resource acquire interface */
@@ -101,9 +104,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	void SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile> BPProjectileClass);
 
-
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	void SpawnProjectile();
 
 private:
+
+	friend class UGMSpellReleaser;
 
 	template<typename T>
 	void HandleInputGeneric_Pressed( T* Component, void (T::*CallBackStart)(), ESpellComponentCurrentAction ComponentAction)

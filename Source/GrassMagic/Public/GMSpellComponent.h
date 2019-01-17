@@ -48,6 +48,7 @@ class GRASSMAGIC_API UGMSpellComponent : public UActorComponent
 	const static float Movement_Adjust_Timer_Interval;
 	const static float Movement_Adjust_Cuttoff;
 
+	friend class UGMSpellReleaser;
 
 public:	
 
@@ -107,9 +108,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	void SpawnProjectile();
 
-private:
+	const FName& GetLeftHandCastSocket() const noexcept { return LeftHandCastSocket; }
+	const FName& GetRightHandCastSocket() const noexcept { return RightHandCastSocket; }
 
-	friend class UGMSpellReleaser;
+private:
 
 	template<typename T>
 	void HandleInputGeneric_Pressed( T* Component, void (T::*CallBackStart)(), ESpellComponentCurrentAction ComponentAction)
@@ -158,4 +160,10 @@ private:
 
 	float MaximumMovmentInput;
 	float MovementOffset;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spell System")
+	FName LeftHandCastSocket;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spell System")
+	FName RightHandCastSocket;
 };

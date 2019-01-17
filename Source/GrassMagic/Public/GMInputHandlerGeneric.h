@@ -27,6 +27,8 @@ public:
 		CallBackGenericInputRelease.Execute();
 	};
 
+	class UGMSpellComponent* GetSpellComp();
+
 private:
 	TWeakObjectPtr<APawn> Owner;
 	

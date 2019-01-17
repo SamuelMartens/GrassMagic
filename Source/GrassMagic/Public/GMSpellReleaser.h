@@ -20,6 +20,10 @@ class GRASSMAGIC_API UGMSpellReleaser : public UObject
 	const static float Focus_Tick_Increment;
 	const static float Focus_Tick_Decrement;
 
+	const static int Aim_Trace_Length = 100000;
+	// Offset from character eye location at which we will spawn projectile
+	const static float Spawn_Location_Offset;
+
 public:
 
 	const static float Focus_Min;
@@ -44,6 +48,8 @@ private:
 
 	UFUNCTION()
 	void OnTickSpellRelease();
+
+	bool GetAimLocationAndRotation(FVector& Location, FRotator& Rotation);
 
 	FTimerHandle TimerHandler_Release;
 

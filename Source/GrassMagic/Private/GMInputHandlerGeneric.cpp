@@ -12,3 +12,10 @@ void FGMInputHandlerGeneric::Init(APawn* NewOwner, UGMSpellComponent* SpellComp,
 
 	CallBackGenericInputRelease.BindUObject(SpellComp, CallBackRelease);
 }
+
+UGMSpellComponent* FGMInputHandlerGeneric::GetSpellComp()
+{
+	check(Owner.IsValid());
+
+	return Cast<UGMSpellComponent>(Owner->GetComponentByClass(UGMSpellComponent::StaticClass()));
+}

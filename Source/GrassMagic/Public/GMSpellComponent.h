@@ -123,6 +123,10 @@ private:
 			return;
 
 		CurrentActionState = ESpellComponentActionState::Prepare;
+		//#DEBUG
+		if (ComponentAction == ESpellComponentCurrentAction::Focus)
+			int ll = 0;
+		//END
 		CurrentAction = ComponentAction;
 		PendingAction.BindUObject(Component, CallBackStart);
 	}
@@ -135,6 +139,15 @@ private:
 		// We react only on release if the same action that currently in progress got release command
 		if (ComponentAction != CurrentAction)
 			return;
+
+		if (CurrentActionState == ESpellComponentActionState::Prepare)
+		{
+			// If this happened then it means that player tried to stop the action on the preparation
+			// step, which means there gonna be no action at all. We stop our preparations, cancel any pending
+			// actions and return to Idle state
+			GenericInputRelease();
+			return;
+		}
 
 		// Call end of input callback. God, please forgive me this ugly syntax
 		(Component->*(CallBackStop))();

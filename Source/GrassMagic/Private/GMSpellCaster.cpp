@@ -2,7 +2,7 @@
 
 #include "GMSpellCaster.h"
 #include "GMGestures.h"
-#include "GMDebug.h"
+#include "GMMisc.h"
 
 #include "Kismet/GameplayStatics.h"
 

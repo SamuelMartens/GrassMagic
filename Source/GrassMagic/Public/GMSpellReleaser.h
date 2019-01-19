@@ -21,8 +21,9 @@ class GRASSMAGIC_API UGMSpellReleaser : public UObject
 	const static float Focus_Tick_Decrement;
 
 	const static int Aim_Trace_Length = 100000;
-	// Offset from character eye location at which we will spawn projectile
-	const static float Spawn_Location_Offset;
+	const static float Spawn_Rotation_Limit;
+	// Stored in degree
+	const static float Max_Spread;
 
 public:
 
@@ -33,7 +34,7 @@ public:
 	~UGMSpellReleaser();
 
 	void Init(FGMInputHandlerGeneric NewGenHandler);
-	void SetGenericInputHandler(FGMInputHandlerGeneric NewGenHandler) { GenHandler = NewGenHandler; }
+	void SetGenericInputHandler(FGMInputHandlerGeneric NewGenHandler);
 
 	void StartRelease();
 	void StopRelease();
@@ -55,9 +56,10 @@ private:
 
 	float Focus;
 
-	bool IsReleasingCurrently;
-	
 	TSubclassOf<AGMSpellProjectile> BPProjectileClass;
 
 	FGMInputHandlerGeneric GenHandler;
+	// We can actually get this from GenHandler, but since we need it every tick,
+	// it makes sense to just cache it
+	class UGMSpellComponent* SpellComp;
 };

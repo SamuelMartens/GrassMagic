@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GMSpellState.h"
-#include "GMDebug.h"
+#include "GMMisc.h"
 
 // For debug purposes
 #include "EngineGlobals.h"

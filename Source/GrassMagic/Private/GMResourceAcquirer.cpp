@@ -2,26 +2,97 @@
 
 #include "GMResourceAcquirer.h"
 
-const float UGMResourceAcquirer::Acquire_Tick = 0.15f;
-const float UGMResourceAcquirer::Acquire_Delay = 0.35f;
+#include "GMSpellComponent.h"
+#include "GMMisc.h"
 
-void UGMResourceAcquirer::StartAcquire()
+#include "Kismet/GameplayStatics.h"
+
+const float UGMResourceAcquirer::Acquire_Tick = 0.1f;
+
+const float UGMResourceAcquirer::Acquire_Drop = 1000.0f;
+const float UGMResourceAcquirer::Environment_Resource = 200.0f;
+const float UGMResourceAcquirer::Resource_Balance_Coefficient = 0.007f;
+
+const float UGMResourceAcquirer::Damage_Resource_Per_Tick = 50.0f;
+const float UGMResourceAcquirer::Control_Resource_Per_Tick = 70.0f;
+const float UGMResourceAcquirer::Change_Resource_Per_Tick = 30.0f;
+
+
+UGMResourceAcquirer::~UGMResourceAcquirer()
 {
+	if (GenHandler.GerOwner().IsValid())
+		GenHandler.GerOwner()->GetWorldTimerManager().ClearTimer(TimerHandler_ResourceAcquire);
+}
+
+void UGMResourceAcquirer::Init(FGMInputHandlerGeneric NewGenHandler)
+{
+	SetGenericInputHandler(NewGenHandler);
+
 	// Set timer to start acquire
 	GenHandler.GerOwner()->GetWorldTimerManager().SetTimer(TimerHandler_ResourceAcquire, this,
-		&UGMResourceAcquirer::OnTickResourceAcquire, Acquire_Tick, true, Acquire_Delay);
+		&UGMResourceAcquirer::OnTickResourceAcquire, Acquire_Tick, true);
 }
+
+void UGMResourceAcquirer::StartAcquire()
+{}
 
 void UGMResourceAcquirer::StopAcquire()
 {
-	GenHandler.GerOwner()->GetWorldTimerManager().ClearTimer(TimerHandler_ResourceAcquire);
-
 	GenHandler.ExecuteReleaseCallBack();
+}
+
+bool UGMResourceAcquirer::GestureCastTick(FGMBaseGesture::EType GestureType) noexcept
+{
+	float ResourceModifier = 0.0f;
+
+	switch (GestureType)
+	{
+	case FGMBaseGesture::EType::Damage:
+		ResourceModifier = Damage_Resource_Per_Tick;
+		break;
+	case FGMBaseGesture::EType::Control:
+		ResourceModifier = Control_Resource_Per_Tick;
+		break;
+	case FGMBaseGesture::EType::Change:
+		ResourceModifier = Change_Resource_Per_Tick;
+		break;
+	default:
+		check(false);
+		break;
+	}
+
+	Resources -= ResourceModifier;
+
+	if (Resources < 0)
+	{
+		Resources = 0;
+		return false;
+	}
+
+	return true;
+}
+
+void UGMResourceAcquirer::Debug_PrintResource() const
+{
+#if !UE_BUILD_SHIPPING
+
+	GEngine->AddOnScreenDebugMessage(GM_DEBUG_RESOURCE_NUM_ID, 2.0f, FColor::Black,
+		FString::Printf(TEXT("Resource : %s"), TCHAR_TO_WCHAR(*FString::SanitizeFloat(Resources))
+		));
+#endif
 }
 
 void UGMResourceAcquirer::OnTickResourceAcquire()
 {
-	Resources += Resource_Per_Tick;
+	float ResourceModifier = 0.0f;
+
+	if (GenHandler.GetSpellComp()->GetCurrentAction() == ESpellComponentCurrentAction::AcquireResource)
+		ResourceModifier = Acquire_Drop;
+	
+
+	Resources += (Environment_Resource - Resources + ResourceModifier) * Resource_Balance_Coefficient;
+
+	Debug_PrintResource();
 }
 
 

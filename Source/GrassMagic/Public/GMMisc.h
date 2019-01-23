@@ -8,6 +8,7 @@
 // just for unification purposes
 #define GM_DEBUG_GESTURE_CAST_ID __LINE__
 #define GM_DEBUG_SPELL_STATE_ID __LINE__
+#define GM_DEBUG_RESOURCE_NUM_ID __LINE__
 
 namespace GMMisc
 {

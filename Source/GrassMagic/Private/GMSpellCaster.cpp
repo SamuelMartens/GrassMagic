@@ -3,10 +3,15 @@
 #include "GMSpellCaster.h"
 #include "GMGestures.h"
 #include "GMMisc.h"
+#include "GMResourceAcquirer.h"
+#include "GMSpellComponent.h"
 
 #include "Kismet/GameplayStatics.h"
 
 const float UGMSpellCaster::Cast_Time_Scale_Coefficient = 0.00001;
+
+const float UGMSpellCaster::Cast_Tick_Interval = 0.10f;
+const float UGMSpellCaster::Cast_Delay = 0.5f;
 
 #if !UE_BUILD_SHIPPING
 
@@ -17,9 +22,10 @@ const float UGMSpellCaster::Debug_Info_Tick_Interval = 0.15f;
 void UGMSpellCaster::StartDamageGesture()
 {
 #if !UE_BUILD_SHIPPING
-	Debug_GestureType = FGMDamageGesture::Inst().GetDominantType();
 	Debug_GestureVector = FGMDamageGesture::Inst().GetBase();
 #endif
+
+	CurrentGestureType = FGMDamageGesture::Inst().GetDominantType();
 	StartGestureGeneric();
 }
 
@@ -31,9 +37,10 @@ void UGMSpellCaster::StopDamageGesture()
 void UGMSpellCaster::StartControlGesture()
 {
 #if !UE_BUILD_SHIPPING
-	Debug_GestureType = FGMControlGesture::Inst().GetDominantType();
 	Debug_GestureVector = FGMControlGesture::Inst().GetBase();
 #endif
+
+	CurrentGestureType = FGMControlGesture::Inst().GetDominantType();
 	StartGestureGeneric();
 }
 
@@ -45,9 +52,10 @@ void UGMSpellCaster::StopControlGesture()
 void UGMSpellCaster::StartChangeGesture()
 {
 #if !UE_BUILD_SHIPPING
-	Debug_GestureType = FGMChangeGesture::Inst().GetDominantType();
 	Debug_GestureVector = FGMChangeGesture::Inst().GetBase();
 #endif
+
+	CurrentGestureType = FGMChangeGesture::Inst().GetDominantType();
 	StartGestureGeneric();
 }
 
@@ -59,21 +67,27 @@ void UGMSpellCaster::StopChangeGesture()
 void UGMSpellCaster::StartGestureGeneric()
 {
 	CastStartTime = FTimespan::FromSeconds(UGameplayStatics::GetRealTimeSeconds(GenHandler.GerOwner()->GetWorld()));
+	
+	GenHandler.GerOwner()->GetWorldTimerManager().SetTimer(TimerHandler_CastTick, this, &UGMSpellCaster::OnCastTick, Cast_Tick_Interval, true, Cast_Delay);
 
 #if !UE_BUILD_SHIPPING
-	GenHandler.GerOwner()->GetWorldTimerManager().SetTimer(Debug_TimerHandle_Info, this, &UGMSpellCaster::Debug_OnTickInfo, Debug_Info_Tick_Interval, true);
+	GenHandler.GerOwner()->GetWorldTimerManager().SetTimer(Debug_TimerHandler_Info, this, &UGMSpellCaster::Debug_OnTickInfo, Debug_Info_Tick_Interval, true);
 #endif
 }
 
 void UGMSpellCaster::StopGestureGeneric(const FVector& GestureVector, FGMBaseGesture::EType Type)
 {
+	CurrentGestureType = FGMBaseGesture::EType::None;
+	
+	GenHandler.GerOwner()->GetWorldTimerManager().ClearTimer(TimerHandler_CastTick);
+
 	const FVector ScaledGestureVector = GestureVector * GetCastDurationMilliseconds() * Cast_Time_Scale_Coefficient;
 	State.AddEffect(ScaledGestureVector, Type);
 
 	GenHandler.ExecuteReleaseCallBack();
 
 #if !UE_BUILD_SHIPPING
-	GenHandler.GerOwner()->GetWorldTimerManager().ClearTimer(Debug_TimerHandle_Info);
+	GenHandler.GerOwner()->GetWorldTimerManager().ClearTimer(Debug_TimerHandler_Info);
 #endif
 }
 
@@ -88,7 +102,7 @@ void UGMSpellCaster::Debug_OnTickInfo() const
 	const double CastTime = GetCastDurationMilliseconds();
 
 	FString CastVectorTypeInfo("Cast Gesture Type: ");
-	switch (Debug_GestureType)
+	switch (CurrentGestureType)
 	{
 	case FGMBaseGesture::EType::Damage:
 		CastVectorTypeInfo.Append("Damage");
@@ -125,5 +139,31 @@ void UGMSpellCaster::Debug_OnTickInfo() const
 	));
 
 #endif
+}
+
+void UGMSpellCaster::OnCastTick()
+{
+	UGMResourceAcquirer* ResAsq = GenHandler.GetSpellComp()->GetResourceAsq();
+	check(ResAsq);
+
+	if (!ResAsq->GestureCastTick(CurrentGestureType))
+	{
+		// We don't have resource to continue cast, so stop
+		switch (CurrentGestureType)
+		{
+		case FGMBaseGesture::EType::Damage:
+			StopDamageGesture();
+			break;
+		case  FGMBaseGesture::EType::Control:
+			StopControlGesture();
+			break;
+		case FGMBaseGesture::EType::Change:
+			StopChangeGesture();
+			break;
+		default:
+			check(false);
+			break;
+		}
+	}
 }
 

@@ -36,8 +36,8 @@ void UGMSpellComponent::Init(float ExpectedMovementInput)
 	GenHandler.Init(Cast<APawn>(GetOwner()), this, &UGMSpellComponent::GenericInputRelease);
 
 	SpellReleaser->Init(GenHandler);
+	ResAcq->Init(GenHandler);
 
-	ResAcq->SetGenericInputHandler(GenHandler);
 	SpellCaster->SetGenericInputHandler(GenHandler);
 
 	MaximumMovmentInput = ExpectedMovementInput;

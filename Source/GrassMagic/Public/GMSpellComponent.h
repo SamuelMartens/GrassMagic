@@ -11,6 +11,7 @@
 
 #include "GMSpellComponent.generated.h"
 
+class UGMResourceAcquirer;
 
 UENUM(BlueprintType)
 enum class ESpellComponentCurrentAction : uint8
@@ -111,6 +112,8 @@ public:
 	const FName& GetLeftHandCastSocket() const noexcept { return LeftHandCastSocket; }
 	const FName& GetRightHandCastSocket() const noexcept { return RightHandCastSocket; }
 
+	UGMResourceAcquirer* GetResourceAsq() noexcept { return ResAcq; }
+
 private:
 
 	template<typename T>
@@ -123,10 +126,7 @@ private:
 			return;
 
 		CurrentActionState = ESpellComponentActionState::Prepare;
-		//#DEBUG
-		if (ComponentAction == ESpellComponentCurrentAction::Focus)
-			int ll = 0;
-		//END
+	
 		CurrentAction = ComponentAction;
 		PendingAction.BindUObject(Component, CallBackStart);
 	}
@@ -159,7 +159,7 @@ private:
 
 	// Use UPROPERTY to avoid garbage collection of this object
 	UPROPERTY()
-	class UGMResourceAcquirer* ResAcq;
+	UGMResourceAcquirer* ResAcq;
 
 	// Use UPROPERTY to avoid garbage collection of this object
 	UPROPERTY()

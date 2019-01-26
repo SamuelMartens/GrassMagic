@@ -26,11 +26,30 @@ AGMSpellProjectile::AGMSpellProjectile()
 	CollisionEffect->SetupAttachment(SphereComponent);
 }
 
+void AGMSpellProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+	MovementComponent->SetVelocityInLocalSpace(FVector(0, 0, 0));
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	LifeEffect->Deactivate();
+
+	CollisionEffect->Activate();
+	CollisionEffect->OnSystemFinished.AddDynamic(this, &AGMSpellProjectile::OnDeath);
+	//Destroy();
+}
+
 // Called when the game starts or when spawned
 void AGMSpellProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AGMSpellProjectile::OnDeath(UParticleSystemComponent* PSystem)
+{
+	Destroy();
 }
 
 // Called every frame

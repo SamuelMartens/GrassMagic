@@ -1,7 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "GMSpellComponent.h"
-//#DEBUG do I need this?
+
 #include "GameFramework/PawnMovementComponent.h"
+#include "Particles/ParticleSystem.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 
 #include "GMResourceAcquirer.h"
 #include "GMSpellCaster.h"
@@ -12,6 +16,21 @@ const float UGMSpellComponent::Movement_Adjust_Rate = 0.07f;
 const float UGMSpellComponent::Movement_Adjust_Timer_Interval = 1.0f;
 const float UGMSpellComponent::Movement_Adjust_Cuttoff = 0.1f;
 
+const FVector UGMSpellComponent::Resource_Acquire_Effect_Scale = FVector(0.1f, 0.1f, 0.15f);
+
+
+namespace
+{
+	UParticleSystemComponent* KillAndDetachCastEffect(UParticleSystemComponent* Effect)
+	{
+		// We don't want particles that were already emitted follow hands,
+		// that's why we call detach here
+		Effect->DetachFromParent(true);
+		Effect->Deactivate();
+		
+		return nullptr;
+	}
+}
 
 // Sets default values for this component's properties
 UGMSpellComponent::UGMSpellComponent() :
@@ -153,6 +172,38 @@ void UGMSpellComponent::SpawnProjectile()
 	check(SpellReleaser);
 
 	SpellReleaser->SpawnProjectile();
+}
+
+void UGMSpellComponent::SpawnCastEffects(UParticleSystem* Effect, FVector Scale, float Delay)
+{
+	FTimerDelegate SpawnEffectDel = FTimerDelegate::CreateUObject(this, &UGMSpellComponent::InternalSpawnCastEffect,
+		Effect, Scale);
+	// InRate value doesn't matter since the function should be executed only once
+	GetOwner()->GetWorldTimerManager().SetTimer(TimerHandler_CastEffect, SpawnEffectDel, 1.0, false, Delay);
+}
+
+void UGMSpellComponent::StopCastEffect()
+{
+	GetOwner()->GetWorldTimerManager().ClearTimer(TimerHandler_CastEffect);
+
+	if (LeftHandEffect)
+	{
+		LeftHandEffect = KillAndDetachCastEffect(LeftHandEffect);
+	}
+
+	if (RightHandEffect)
+	{
+		RightHandEffect = KillAndDetachCastEffect(RightHandEffect);
+	}
+}
+
+void UGMSpellComponent::InternalSpawnCastEffect(UParticleSystem* Effect, FVector Scale)
+{
+	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(GetOwner()->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+	check(SkeletalComp);
+
+	LeftHandEffect = UGameplayStatics::SpawnEmitterAttached(Effect, SkeletalComp, GetLeftHandCastSocket(), FVector(0), FRotator(0), Scale);
+	RightHandEffect = UGameplayStatics::SpawnEmitterAttached(Effect, SkeletalComp, GetRightHandCastSocket(), FVector(0), FRotator(0), Scale);
 }
 
 float UGMSpellComponent::Prepare(float InputValue)

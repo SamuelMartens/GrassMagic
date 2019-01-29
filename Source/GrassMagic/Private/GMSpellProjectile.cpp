@@ -37,7 +37,6 @@ void AGMSpellProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 
 	CollisionEffect->Activate();
 	CollisionEffect->OnSystemFinished.AddDynamic(this, &AGMSpellProjectile::OnDeath);
-	//Destroy();
 }
 
 // Called when the game starts or when spawned

@@ -12,6 +12,8 @@
 #include "GMSpellComponent.generated.h"
 
 class UGMResourceAcquirer;
+class UParticleSystem;
+class UParticleSystemComponent;
 
 UENUM(BlueprintType)
 enum class ESpellComponentCurrentAction : uint8
@@ -49,6 +51,8 @@ class GRASSMAGIC_API UGMSpellComponent : public UActorComponent
 	const static float Movement_Adjust_Timer_Interval;
 	const static float Movement_Adjust_Cuttoff;
 
+	const static FVector Resource_Acquire_Effect_Scale;
+
 	friend class UGMSpellReleaser;
 
 public:	
@@ -69,7 +73,7 @@ public:
 	/* Resource acquire interface */
 	void HandleAcquireResource_Pressed();
 	void HandleAcquireResource_Released();
-
+	
 
 	/* Spell cast Interface */
 	void HandleDamageGesture_Pressed();
@@ -97,11 +101,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	float GetFocus() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	UFUNCTION(BlueprintCallable, Category = "Spell System Constants")
 	float GetFocusMin() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	UFUNCTION(BlueprintCallable, Category = "Spell System Constants")
 	float GetFocusMax() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System Constants")
+	static FVector GetResourceAcquireEffectScale() noexcept { return Resource_Acquire_Effect_Scale; };
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System Effects")
+	UParticleSystem* GetResourceAcquireEffect() const { return ResourceAcquireEffect; }
 
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	void SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile> BPProjectileClass);
@@ -109,10 +119,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	void SpawnProjectile();
 
+	// Spawn effects on magic actions in right and left hand
+	UFUNCTION(BlueprintCallable, Category = "Spell System Effects")
+	void SpawnCastEffects(UParticleSystem* Effect, FVector Scale, float Delay);
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System Effects")
+	void StopCastEffect();
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	const FName& GetLeftHandCastSocket() const noexcept { return LeftHandCastSocket; }
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	const FName& GetRightHandCastSocket() const noexcept { return RightHandCastSocket; }
 
 	UGMResourceAcquirer* GetResourceAsq() noexcept { return ResAcq; }
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spell System Effect")
+	UParticleSystem* ResourceAcquireEffect;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spell System Effect")
+	UParticleSystem* GesturesEffect;
 
 private:
 
@@ -153,6 +179,9 @@ private:
 		(Component->*(CallBackStop))();
 	}
 
+	UFUNCTION()
+	void InternalSpawnCastEffect(UParticleSystem* Effect, FVector Scale);
+
 	float Prepare(float InpurValue);
 
 	DelVoidVoid PendingAction;
@@ -179,4 +208,11 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spell System")
 	FName RightHandCastSocket;
+
+	
+
+	UParticleSystemComponent* LeftHandEffect = nullptr;
+	UParticleSystemComponent* RightHandEffect = nullptr;
+	// We mainly need to have delay before cast effect appears
+	FTimerHandle TimerHandler_CastEffect;
 };

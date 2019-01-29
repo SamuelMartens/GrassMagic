@@ -146,6 +146,9 @@ void UGMSpellCaster::OnCastTick()
 	UGMResourceAcquirer* ResAsq = GenHandler.GetSpellComp()->GetResourceAsq();
 	check(ResAsq);
 
+	//#DEBUG
+	return;
+	//END
 	if (!ResAsq->GestureCastTick(CurrentGestureType))
 	{
 		// We don't have resource to continue cast, so stop

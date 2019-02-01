@@ -52,6 +52,19 @@ class GRASSMAGIC_API UGMSpellComponent : public UActorComponent
 	const static float Movement_Adjust_Cuttoff;
 
 	const static FVector Resource_Acquire_Effect_Scale;
+	const static FVector Gesture_Effect_Scale;
+
+	const static FVector Damage_Gesture_Effect_Color;
+	const static FVector Control_Gesture_Effect_Color;
+	const static FVector Change_Gesture_Effect_Color;
+
+	const static float Cast_Effects_Delay;
+
+	const static float Gesture_Effect_Interval;
+	const static float Gesture_Effect_Time_Dilation;
+
+	const static float Default_Custom_Time_Dilation;
+
 
 	friend class UGMSpellReleaser;
 
@@ -119,9 +132,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	void SpawnProjectile();
 
-	// Spawn effects on magic actions in right and left hand
-	UFUNCTION(BlueprintCallable, Category = "Spell System Effects")
-	void SpawnCastEffects(UParticleSystem* Effect, FVector Scale, float Delay);
+	UFUNCTION(BlueprintCallable, Category = "Spell System Effect")
+	void SpawnResourceAcquireEffect();
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System Effect")
+	void SpawnGestureEffect(ESpellComponentCurrentAction CurrentEffect);
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System Effect")
+	void SpawnFocusEffect();
 
 	UFUNCTION(BlueprintCallable, Category = "Spell System Effects")
 	void StopCastEffect();
@@ -139,6 +157,8 @@ protected:
 	UParticleSystem* ResourceAcquireEffect;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spell System Effect")
 	UParticleSystem* GesturesEffect;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spell System Effect")
+	UParticleSystem* FocusEffect;
 
 private:
 
@@ -179,8 +199,11 @@ private:
 		(Component->*(CallBackStop))();
 	}
 
+	// Spawn action that will be taken after some delay
 	UFUNCTION()
-	void InternalSpawnCastEffect(UParticleSystem* Effect, FVector Scale);
+	void SpawnCastEffectTick();
+
+	void GenericSpawnCastEffect(UParticleSystem* Effect, const FVector& Scale = FVector(1.0), bool ShouldLoop = false, float Interval = 1.0f);
 
 	float Prepare(float InpurValue);
 
@@ -210,9 +233,8 @@ private:
 	FName RightHandCastSocket;
 
 	
-
-	UParticleSystemComponent* LeftHandEffect = nullptr;
-	UParticleSystemComponent* RightHandEffect = nullptr;
+	UParticleSystemComponent* LeftHandEffect;
+	UParticleSystemComponent* RightHandEffect;
 	// We mainly need to have delay before cast effect appears
 	FTimerHandle TimerHandler_CastEffect;
 };

@@ -16,19 +16,30 @@ const float UGMSpellComponent::Movement_Adjust_Rate = 0.07f;
 const float UGMSpellComponent::Movement_Adjust_Timer_Interval = 1.0f;
 const float UGMSpellComponent::Movement_Adjust_Cuttoff = 0.1f;
 
-const FVector UGMSpellComponent::Resource_Acquire_Effect_Scale = FVector(0.1f, 0.1f, 0.15f);
+const FVector UGMSpellComponent::Resource_Acquire_Effect_Scale = FVector(0.1f, 0.1f, 0.16f);
+const FVector UGMSpellComponent::Gesture_Effect_Scale = FVector(0.1f);
 
+const FVector UGMSpellComponent::Damage_Gesture_Effect_Color = FVector(0, 255, 0);
+const FVector UGMSpellComponent::Control_Gesture_Effect_Color = FVector(255, 0, 0);
+const FVector UGMSpellComponent::Change_Gesture_Effect_Color = FVector(0, 0, 255);
+
+const float UGMSpellComponent::Cast_Effects_Delay = 0.15f;
+const float UGMSpellComponent::Gesture_Effect_Interval = 0.5f;
+const float UGMSpellComponent::Gesture_Effect_Time_Dilation = 0.6f;
+
+const float UGMSpellComponent::Default_Custom_Time_Dilation = 1.0f;
 
 namespace
 {
-	UParticleSystemComponent* KillAndDetachCastEffect(UParticleSystemComponent* Effect)
+	void ResetCastEffect(UParticleSystemComponent* Effect, const FDetachmentTransformRules& DetachTransformRules, float DefaultTimeDilation)
 	{
+		Effect->ClearParameter("color");
+		Effect->CustomTimeDilation = DefaultTimeDilation;
+
 		// We don't want particles that were already emitted follow hands,
 		// that's why we call detach here
-		Effect->DetachFromParent(true);
+		Effect->DetachFromComponent(DetachTransformRules);
 		Effect->Deactivate();
-		
-		return nullptr;
 	}
 }
 
@@ -38,7 +49,13 @@ UGMSpellComponent::UGMSpellComponent() :
 	CurrentAction(ESpellComponentCurrentAction::None),
 	MovementOffset(0.0f),
 	MaximumMovmentInput(0.0f)
-{}
+{
+	LeftHandEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LeftHandEffect"));
+	LeftHandEffect->bAutoActivate = false;
+	RightHandEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("RightHandEffect"));
+	RightHandEffect->bAutoActivate = false;
+
+}
 
 void UGMSpellComponent::BeginPlay()
 {
@@ -47,6 +64,8 @@ void UGMSpellComponent::BeginPlay()
 	ResAcq = NewObject<UGMResourceAcquirer>(this, UGMResourceAcquirer::StaticClass(), TEXT("ResourceAcquierer"));
 	SpellCaster = NewObject<UGMSpellCaster>(this, UGMSpellCaster::StaticClass(), TEXT("SpellCaster"));
 	SpellReleaser = NewObject<UGMSpellReleaser>(this, UGMSpellReleaser::StaticClass(), TEXT("SpellReleaser"));
+
+	
 }
 
 void UGMSpellComponent::Init(float ExpectedMovementInput)
@@ -174,36 +193,91 @@ void UGMSpellComponent::SpawnProjectile()
 	SpellReleaser->SpawnProjectile();
 }
 
-void UGMSpellComponent::SpawnCastEffects(UParticleSystem* Effect, FVector Scale, float Delay)
+void UGMSpellComponent::SpawnResourceAcquireEffect()
 {
-	FTimerDelegate SpawnEffectDel = FTimerDelegate::CreateUObject(this, &UGMSpellComponent::InternalSpawnCastEffect,
-		Effect, Scale);
-	// InRate value doesn't matter since the function should be executed only once
-	GetOwner()->GetWorldTimerManager().SetTimer(TimerHandler_CastEffect, SpawnEffectDel, 1.0, false, Delay);
+	GenericSpawnCastEffect(ResourceAcquireEffect, Resource_Acquire_Effect_Scale);
+}
+
+void UGMSpellComponent::SpawnGestureEffect(ESpellComponentCurrentAction CurrentEffect)
+{
+	FVector EffectColor;
+
+	switch (CurrentEffect)
+	{
+	case ESpellComponentCurrentAction::CastDamageGesture:
+		EffectColor = Damage_Gesture_Effect_Color;
+		break;
+	case ESpellComponentCurrentAction::CastControlGesture:
+		EffectColor = Control_Gesture_Effect_Color;
+		break;
+	case ESpellComponentCurrentAction::CastChangeGesture:
+		EffectColor = Change_Gesture_Effect_Color;
+		break;
+	default:
+		check(false);
+		break;
+	}
+
+
+	LeftHandEffect->SetVectorParameter(FName("color"), EffectColor);
+	RightHandEffect->SetVectorParameter(FName("color"), EffectColor);
+
+	LeftHandEffect->CustomTimeDilation = Gesture_Effect_Time_Dilation;
+	RightHandEffect->CustomTimeDilation = Gesture_Effect_Time_Dilation;
+
+	GenericSpawnCastEffect(GesturesEffect, Gesture_Effect_Scale, true, Gesture_Effect_Interval);
+
+}
+
+void UGMSpellComponent::SpawnFocusEffect()
+{
+	LeftHandEffect->CustomTimeDilation = 2.0f;
+	RightHandEffect->CustomTimeDilation = 2.0f;
+
+	GenericSpawnCastEffect(FocusEffect, FVector(0.05f), true, 0.1f);
 }
 
 void UGMSpellComponent::StopCastEffect()
 {
 	GetOwner()->GetWorldTimerManager().ClearTimer(TimerHandler_CastEffect);
 
-	if (LeftHandEffect)
-	{
-		LeftHandEffect = KillAndDetachCastEffect(LeftHandEffect);
-	}
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, false);
 
-	if (RightHandEffect)
-	{
-		RightHandEffect = KillAndDetachCastEffect(RightHandEffect);
-	}
+	ResetCastEffect(LeftHandEffect, DetachRules, Default_Custom_Time_Dilation);
+	ResetCastEffect(RightHandEffect, DetachRules, Default_Custom_Time_Dilation);
 }
 
-void UGMSpellComponent::InternalSpawnCastEffect(UParticleSystem* Effect, FVector Scale)
+void UGMSpellComponent::SpawnCastEffectTick()
 {
+	LeftHandEffect->Activate(true);
+	RightHandEffect->Activate(true);
+}
+
+void UGMSpellComponent::GenericSpawnCastEffect(UParticleSystem* Effect, const FVector& Scale, bool ShouldLoop, float Interval)
+{
+	LeftHandEffect->SetTemplate(Effect);
+	RightHandEffect->SetTemplate(Effect);
+
 	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(GetOwner()->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 	check(SkeletalComp);
 
-	LeftHandEffect = UGameplayStatics::SpawnEmitterAttached(Effect, SkeletalComp, GetLeftHandCastSocket(), FVector(0), FRotator(0), Scale);
-	RightHandEffect = UGameplayStatics::SpawnEmitterAttached(Effect, SkeletalComp, GetRightHandCastSocket(), FVector(0), FRotator(0), Scale);
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, false);
+
+	LeftHandEffect->AttachToComponent(SkeletalComp, AttachmentRules, GetLeftHandCastSocket());
+	RightHandEffect->AttachToComponent(SkeletalComp, AttachmentRules, GetRightHandCastSocket());
+
+	// Rotation and location needs to be reset. Cause when we detach with Keep World Position rules
+	// this info is stored in RelativePosition/Rotation/Scale, and we will have undesirable offset
+	LeftHandEffect->RelativeScale3D = Scale;
+	RightHandEffect->RelativeScale3D = Scale;
+	LeftHandEffect->RelativeLocation = FVector(0, 0, 0);
+	RightHandEffect->RelativeLocation = FVector(0, 0, 0);
+	LeftHandEffect->RelativeRotation = FRotator(0);
+	RightHandEffect->RelativeRotation = FRotator(0);
+
+	// InRate value doesn't matter since the function should be executed only once
+	GetOwner()->GetWorldTimerManager().SetTimer(TimerHandler_CastEffect, this,
+		&UGMSpellComponent::SpawnCastEffectTick, Interval, ShouldLoop, Cast_Effects_Delay);
 }
 
 float UGMSpellComponent::Prepare(float InputValue)

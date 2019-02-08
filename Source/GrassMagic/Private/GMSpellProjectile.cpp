@@ -8,10 +8,6 @@
 // Sets default values
 AGMSpellProjectile::AGMSpellProjectile()
 {
-	//#DEBUG clen up this actor whe you decide what is not needed. After all, do we need tick and BeginPlay?
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	SphereComponent->InitSphereRadius(2.5f);
 

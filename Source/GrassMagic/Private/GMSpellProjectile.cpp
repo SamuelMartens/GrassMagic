@@ -5,6 +5,10 @@
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
+#include "GMSpellComponent.h"
+#include "GMSpellEffectManagerComponent.h"
+#include "GMSpellEffect.h"
+
 // Sets default values
 AGMSpellProjectile::AGMSpellProjectile()
 {
@@ -31,15 +35,37 @@ void AGMSpellProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 
 	LifeEffect->Deactivate();
 
+	AffectOverlappedActor(OtherActor);
+
 	CollisionEffect->Activate();
 	CollisionEffect->OnSystemFinished.AddDynamic(this, &AGMSpellProjectile::OnDeath);
 }
 
-// Called when the game starts or when spawned
-void AGMSpellProjectile::BeginPlay()
+void AGMSpellProjectile::SetSpellData(float Value, FGMBaseGesture::EType Type, int Grade)
 {
-	Super::BeginPlay();
-	
+	SpellValue = Value;
+	SpellType = Type;
+	SpellGrade = Grade;
+
+	FVector ColorVal;
+
+	switch (SpellType)
+	{
+	case FGMBaseGesture::EType::Damage:
+		ColorVal = UGMSpellComponent::Damage_Gesture_Effect_Color;
+		break;
+	case FGMBaseGesture::EType::Control:
+		ColorVal = UGMSpellComponent::Control_Gesture_Effect_Color;
+		break;
+	case FGMBaseGesture::EType::Change:
+		ColorVal = UGMSpellComponent::Change_Gesture_Effect_Color;
+		break;
+	default:
+		check(false);
+		break;
+	}
+
+	LifeEffect->SetVectorParameter("color", ColorVal);
 }
 
 void AGMSpellProjectile::OnDeath(UParticleSystemComponent* PSystem)
@@ -47,10 +73,17 @@ void AGMSpellProjectile::OnDeath(UParticleSystemComponent* PSystem)
 	Destroy();
 }
 
-// Called every frame
-void AGMSpellProjectile::Tick(float DeltaTime)
+void AGMSpellProjectile::AffectOverlappedActor(AActor* Actor)
 {
-	Super::Tick(DeltaTime);
+	UGMSpellEffectManagerComponent* SpellEffectManag = 
+		Cast<UGMSpellEffectManagerComponent>(Actor->GetComponentByClass(UGMSpellEffectManagerComponent::StaticClass()));
 
+	if (!SpellEffectManag)
+		return;
+
+	UGMBaseSpellEffect* SpellEffect =
+		NewObject<UGMSpellEffect_Damage_1>(this, UGMSpellEffect_Damage_1::StaticClass(), TEXT("Damage Effect"));
+
+	SpellEffect->Init(Cast<APawn>(Actor), Instigator, SpellValue);
+	SpellEffectManag->AddAndStartEffect(SpellEffect);
 }
-

@@ -37,8 +37,7 @@ public:
 	};
 
 
-	FGMSpellState() :
-		ActiveTypes(static_cast<uint8_t>(FGMBaseGesture::EType::None))
+	FGMSpellState()
 	{};
 
 	~FGMSpellState() = default;
@@ -62,6 +61,12 @@ public:
 		
 		return ActiveGrade;
 	}
+
+	FGMBaseGesture::EType GetLatestType() const noexcept { return LatestType; }
+
+	float GetActiveTypesValue() const;
+
+	void Reset() noexcept;
 	
 	void Debug_PrintState() const;
 
@@ -69,6 +74,8 @@ private:
 
 	FStateBase Base;
 	
-	uint8_t ActiveTypes;
+	uint8_t ActiveTypes = static_cast<uint8_t>(FGMBaseGesture::EType::None);
+
+	FGMBaseGesture::EType LatestType = FGMBaseGesture::EType::None;
 
 };

@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include <vector>
-#include <utility>
-
 /**
  *  Implementation of Grassmann algebra primitives and 
  *  operations in 3D space
@@ -86,7 +83,7 @@ struct FGA
 		E3 = 0b0100
 	};
 
-	using BasisInfoValue_t = std::pair<uint8_t, float>;
+	using BasisInfoValue_t = TPair<uint8_t, float>;
 
 
 	static uint8_t BitAnd(EBasis Val1, EBasis Val2) noexcept
@@ -175,41 +172,41 @@ struct FGA
 	static void E123(FTrivector& T, float Val) noexcept { T._E123 = Val; }
 
 	/* Get data via meta info */
-	static std::vector<BasisInfoValue_t> GetBasisInfoValueArray(const FVector& Vector)
+	static TArray<BasisInfoValue_t> GetBasisInfoValueArray(const FVector& Vector)
 	{
-		return std::vector<BasisInfoValue_t>({
-			std::make_pair(static_cast<uint8_t>(EBasis::E1), E1(Vector)),
-			std::make_pair(static_cast<uint8_t>(EBasis::E2), E2(Vector)),
-			std::make_pair(static_cast<uint8_t>(EBasis::E3), E3(Vector))
+		return TArray<BasisInfoValue_t>({
+			BasisInfoValue_t(static_cast<uint8_t>(EBasis::E1), E1(Vector)),
+			BasisInfoValue_t(static_cast<uint8_t>(EBasis::E2), E2(Vector)),
+			BasisInfoValue_t(static_cast<uint8_t>(EBasis::E3), E3(Vector))
 			});
 	}
 
-	static std::vector<BasisInfoValue_t> GetBasisInfoValueArray(const FBivector& Bivector)
+	static TArray<BasisInfoValue_t> GetBasisInfoValueArray(const FBivector& Bivector)
 	{
-		return std::vector<BasisInfoValue_t>({
-			std::make_pair(BitOr(EBasis::E2, EBasis::E3), E23(Bivector)),
-			std::make_pair(BitOr(EBasis::E3, EBasis::E1), E31(Bivector)),
-			std::make_pair(BitOr(EBasis::E1, EBasis::E2), E12(Bivector))
+		return TArray<BasisInfoValue_t>({
+			BasisInfoValue_t(BitOr(EBasis::E2, EBasis::E3), E23(Bivector)),
+			BasisInfoValue_t(BitOr(EBasis::E3, EBasis::E1), E31(Bivector)),
+			BasisInfoValue_t(BitOr(EBasis::E1, EBasis::E2), E12(Bivector))
 			});
 	}
 
-	static std::vector<BasisInfoValue_t> GetBasisInfoValueArray(const FTrivector& Trivector)
+	static TArray<BasisInfoValue_t> GetBasisInfoValueArray(const FTrivector& Trivector)
 	{
-		return std::vector<BasisInfoValue_t>({
-			std::make_pair(BitOr(EBasis::E1, EBasis::E2) | static_cast<uint8_t>(EBasis::E3), E123(Trivector))
+		return TArray<BasisInfoValue_t>({
+			BasisInfoValue_t(BitOr(EBasis::E1, EBasis::E2) | static_cast<uint8_t>(EBasis::E3), E123(Trivector))
 			});
 	}
 
 	template<typename T>
-	static std::pair<bool, float> GetValueByInfo(const T& BasePrimitive, uint8_t BasisInfo)
+	static TPair<bool, float> GetValueByInfo(const T& BasePrimitive, uint8_t BasisInfo)
 	{
 		for (const auto& InfoValue : GetBasisInfoValueArray(BasePrimitive))
 		{
-			if ((static_cast<uint8_t>(InfoValue.first) & BasisInfo) == BasisInfo)
-				return std::make_pair(true, InfoValue.second);
+			if ((static_cast<uint8_t>(InfoValue.Key) & BasisInfo) == BasisInfo)
+				return BasisInfoValue_t(true, InfoValue.Value);
 		}
 
-		return std::make_pair(false, 0.0f);
+		return BasisInfoValue_t(false, 0.0f);
 	}
 
 

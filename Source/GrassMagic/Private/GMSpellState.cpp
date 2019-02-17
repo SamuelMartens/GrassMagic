@@ -7,6 +7,23 @@
 #include "EngineGlobals.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 
+namespace
+{
+	float SearchBasisInfoArray(TArray<FGA::BasisInfoValue_t>&& Array, uint8_t ActiveTypes)
+	{
+		for (FGA::BasisInfoValue_t& BasisInfo : Array)
+		{
+			if (ActiveTypes & BasisInfo.Key)
+				return BasisInfo.Value;
+		}
+
+		// We have this grade but we didn't found appropriate value
+		check(false);
+
+		return 0.0f;
+	}	
+}
+
 void FGMSpellState::AddEffect(const FVector& EffectValue, FGMBaseGesture::EType Type) noexcept
 {
 
@@ -42,13 +59,42 @@ void FGMSpellState::AddEffect(const FVector& EffectValue, FGMBaseGesture::EType 
 	{
 		ActiveTypes = static_cast<uint8_t>(Type) |
 			static_cast<uint8_t>(ActiveTypes);
+
+		LatestType = Type;
 	}
 	else
 	{
-		ActiveTypes = static_cast<uint8_t>(FGMBaseGesture::EType::None);
+		Reset();
 	}
 
 	Debug_PrintState();
+}
+
+float FGMSpellState::GetActiveTypesValue() const
+{
+	switch (GetActiveGrade())
+	{
+	case 0:
+		return 0.0f;
+	case 1:
+		return SearchBasisInfoArray(FGA::GetBasisInfoValueArray(Base.Vector), ActiveTypes);
+	case 2:
+		return SearchBasisInfoArray(FGA::GetBasisInfoValueArray(Base.Bivector), ActiveTypes);
+	case 3:
+		return SearchBasisInfoArray(FGA::GetBasisInfoValueArray(Base.Trivector), ActiveTypes);
+	default:
+		check(false);
+		break;
+	}
+
+	return 0.0f;
+}
+
+void FGMSpellState::Reset() noexcept
+{
+	ActiveTypes = static_cast<uint8_t>(FGMBaseGesture::EType::None);
+	LatestType = FGMBaseGesture::EType::None;
+	Base.Scalar = 0.0f;
 }
 
 void FGMSpellState::Debug_PrintState() const

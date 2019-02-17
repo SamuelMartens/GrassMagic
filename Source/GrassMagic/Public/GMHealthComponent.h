@@ -10,6 +10,8 @@
 // Delegate should be Multi-cast so we can attach a few funtions to it
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, Health);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthDeathSignature);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GRASSMAGIC_API UGMHealthComponent : public UActorComponent
@@ -22,7 +24,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChangedSignature OnHealthChanged;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealthDeathSignature OnDeath;
 
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetHealth() const noexcept { return Health; }
 
 protected:
 	// Called when the game starts

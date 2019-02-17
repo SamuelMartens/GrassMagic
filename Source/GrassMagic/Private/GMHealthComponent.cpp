@@ -15,6 +15,8 @@ void UGMHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Health = MaxHealth;
+
 	AActor* Owner = GetOwner();
 	check(Owner);
 
@@ -24,5 +26,9 @@ void UGMHealthComponent::BeginPlay()
 
 void UGMHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
+	Health -= Damage;
 	OnHealthChanged.Broadcast(Health);
+
+	if (Health <= 0)
+		OnDeath.Broadcast();
 }

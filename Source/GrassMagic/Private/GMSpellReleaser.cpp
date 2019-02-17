@@ -8,6 +8,8 @@
 #include "GMSpellProjectile.h"
 #include "GMSpellComponent.h"
 #include "GMMisc.h"
+#include "GMSpellState.h"
+#include "GMSpellCaster.h"
 
 const float UGMSpellReleaser::Focus_Min = 0.0f;
 // Be careful with this value. If you make it less or bigger than 1.0 then your
@@ -41,6 +43,9 @@ void UGMSpellReleaser::Init(FGMInputHandlerGeneric NewGenHandler)
 
 void UGMSpellReleaser::StartRelease()
 {
+	if (SpellComp->GetSpellCaster()->GetSpellState().GetLatestType() == FGMBaseGesture::EType::None)
+		// We haven't cast any gesture, so there nothing to release
+		GenHandler.ExecuteReleaseCallBack();
 }
 
 void UGMSpellReleaser::StopRelease()
@@ -72,7 +77,19 @@ void UGMSpellReleaser::SpawnProjectile()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Instigator = GenHandler.GerOwner().Get();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	GenHandler.GerOwner()->GetWorld()->SpawnActor<AGMSpellProjectile>(BPProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+	AGMSpellProjectile* SpellProj =
+		GenHandler.GerOwner()->GetWorld()->SpawnActor<AGMSpellProjectile>(BPProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+	const FGMSpellState& SpellState = SpellComp->GetSpellCaster()->GetSpellState();
+
+	const int SpellGrade = SpellState.GetActiveGrade();
+	const FGMBaseGesture::EType SpellType = SpellState.GetLatestType();
+	const float SpellValue = SpellState.GetActiveTypesValue();
+
+	SpellProj->SetSpellData(SpellValue, SpellType, SpellGrade);
+	SpellProj->Instigator = Cast<APawn>(SpellComp->GetOwner());
+
+	SpellComp->GetSpellCaster()->ResetState();
 }
 
 void UGMSpellReleaser::OnTickSpellRelease()

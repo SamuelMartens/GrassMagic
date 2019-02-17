@@ -12,6 +12,7 @@
 #include "GMSpellComponent.generated.h"
 
 class UGMResourceAcquirer;
+class UGMSpellCaster;
 class UParticleSystem;
 class UParticleSystemComponent;
 
@@ -54,9 +55,6 @@ class GRASSMAGIC_API UGMSpellComponent : public UActorComponent
 	const static FVector Resource_Acquire_Effect_Scale;
 	const static FVector Gesture_Effect_Scale;
 
-	const static FVector Damage_Gesture_Effect_Color;
-	const static FVector Control_Gesture_Effect_Color;
-	const static FVector Change_Gesture_Effect_Color;
 
 	const static float Cast_Effects_Delay;
 
@@ -69,6 +67,10 @@ class GRASSMAGIC_API UGMSpellComponent : public UActorComponent
 	friend class UGMSpellReleaser;
 
 public:	
+
+	const static FVector Damage_Gesture_Effect_Color;
+	const static FVector Control_Gesture_Effect_Color;
+	const static FVector Change_Gesture_Effect_Color;
 
 	// Sets default values for this component's properties
 	UGMSpellComponent();
@@ -150,6 +152,7 @@ public:
 	const FName& GetRightHandCastSocket() const noexcept { return RightHandCastSocket; }
 
 	UGMResourceAcquirer* GetResourceAsq() noexcept { return ResAcq; }
+	UGMSpellCaster* GetSpellCaster() noexcept { return SpellCaster; }
 
 protected:
 

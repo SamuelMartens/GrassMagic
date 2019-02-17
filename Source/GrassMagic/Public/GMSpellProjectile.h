@@ -2,9 +2,12 @@
 
 #pragma once
 
+#include "GMGestures.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GMSpellProjectile.generated.h"
+
 
 UCLASS()
 class GRASSMAGIC_API AGMSpellProjectile : public AActor
@@ -12,23 +15,19 @@ class GRASSMAGIC_API AGMSpellProjectile : public AActor
 	GENERATED_BODY()
 	
 public:	
+
 	// Sets default values for this actor's properties
 	AGMSpellProjectile();
 
 	UFUNCTION()
 	void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-
+	void SetSpellData(float Value, FGMBaseGesture::EType Type, int Grade);
+	
 	UFUNCTION()
 	void OnDeath(UParticleSystemComponent* PSystem);
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
 	class USphereComponent* SphereComponent;
@@ -41,4 +40,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
 	class UParticleSystemComponent* CollisionEffect;
+
+private:
+
+	void AffectOverlappedActor(AActor* Actor);
+
+	float SpellValue = 0.0f;
+
+	FGMBaseGesture::EType SpellType = FGMBaseGesture::EType::None;
+
+	int SpellGrade = 0;
+
 };

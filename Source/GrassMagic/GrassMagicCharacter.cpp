@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 
 #include "GMSpellComponent.h"
+#include "GMHealthComponent.h"
 
 
 const float AGrassMagicCharacter::Input_Value_Per_Tick = 1.0f;
@@ -52,6 +53,7 @@ AGrassMagicCharacter::AGrassMagicCharacter()
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
 	SpellComponent = CreateDefaultSubobject<UGMSpellComponent>(TEXT("SpellComponent"));
+	HealthComponent = CreateDefaultSubobject<UGMHealthComponent>(TEXT("HealthComponent"));
 }
 
 void AGrassMagicCharacter::BeginPlay()

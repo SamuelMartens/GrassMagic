@@ -36,6 +36,10 @@ public:
 	void StartChangeGesture();
 	void StopChangeGesture();
 
+	const FGMSpellState& GetSpellState() const noexcept { return State; }
+
+	void ResetState() noexcept { State.Reset(); };
+
 private:
 
 	void StartGestureGeneric();

@@ -26,6 +26,9 @@ class AGrassMagicCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = SpellSystem, meta = (AllowPrivateAccess = "true"))
 	class UGMSpellComponent* SpellComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	class UGMHealthComponent* HealthComponent;
+
 public:
 	AGrassMagicCharacter();
 

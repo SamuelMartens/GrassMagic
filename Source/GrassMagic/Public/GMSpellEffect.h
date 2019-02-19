@@ -7,6 +7,8 @@
 
 #include "GMSpellEffect.generated.h"
 
+class UParticleSystemComponent;
+
 /*-------------- Base class ------------------- */
 
 UCLASS()
@@ -53,13 +55,18 @@ private:
 
 /*-------------- Damage ------------------- */
 
+// Slow dot
 UCLASS()
 class UGMSpellEffect_Damage_1 :public UGMBaseSpellEffect
 {
 	GENERATED_BODY()
 
-	const static int Ticks_Num = 15;
+	const static int Ticks_Num = 30;
 	const static float Tick_Interval;
+
+	const static FVector Particle_Effect_Scale;
+	const static FName Attach_Socket;
+	const static float Custom_Time_Dilation;
 
 public:
 
@@ -74,8 +81,69 @@ protected:
 
 private:
 
+	UParticleSystemComponent* ParticleEffect = nullptr;
+
 	int TicksDone = 0;
 
 	FTimerHandle TimerHandler_DamageTick;
+
+};
+
+// Square dot
+UCLASS()
+class UGMSpellEffect_Damage_2 : public UGMBaseSpellEffect
+{
+	GENERATED_BODY()
+
+	const static int Ticks_Num = 15;
+	const static float Tick_Interval_Initial;
+	const static float Tick_Interval_Modifier;
+
+	const static FName Attach_Socket;
+	const static FVector Particle_Effect_Scale;
+
+public:
+
+	virtual void Start() override;
+
+	UFUNCTION()
+	void OnDamageTick();
+
+protected:
+
+	virtual void Die() override;
+
+private:
+
+	UParticleSystemComponent* ParticleEffect = nullptr;
+
+	int TicksDone = 0;
+
+	float LastTickInterval = 0.0f;
+
+	FTimerHandle TimerHandler_DamageTick;
+};
+
+// Instant damage
+UCLASS()
+class UGMSpellEffect_Damage_3 : public UGMBaseSpellEffect
+{
+	GENERATED_BODY()
+
+	const static FVector Particle_Effect_Scale;
+
+	const static float Custom_Time_Dilation_1;
+	const static float Custom_Time_Dilation_2;
+
+	const static FRotator Particle_Effect_Rotation_2;
+	const static FVector Particle_Effect_Color_2;
+
+public:
+
+	virtual void Start() override;
+
+private:
+
+	UParticleSystemComponent* ParticleEffect = nullptr;
 
 };

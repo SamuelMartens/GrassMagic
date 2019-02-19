@@ -82,7 +82,7 @@ void AGMSpellProjectile::AffectOverlappedActor(AActor* Actor)
 		return;
 
 	UGMBaseSpellEffect* SpellEffect =
-		NewObject<UGMSpellEffect_Damage_1>(this, UGMSpellEffect_Damage_1::StaticClass(), TEXT("Damage Effect"));
+		NewObject<UGMSpellEffect_Damage_3>(this, UGMSpellEffect_Damage_3::StaticClass(), TEXT("Damage Effect"));
 
 	SpellEffect->Init(Cast<APawn>(Actor), Instigator, SpellValue);
 	SpellEffectManag->AddAndStartEffect(SpellEffect);

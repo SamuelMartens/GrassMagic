@@ -26,7 +26,8 @@ void UGMHealthComponent::BeginPlay()
 
 void UGMHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-	Health -= Damage;
+	// Derived from TotalDamage = Damage + Damage * (1 - DamageResist)
+	Health -= Damage * (2 - GetDamageResist());
 	OnHealthChanged.Broadcast(Health);
 
 	if (Health <= 0)

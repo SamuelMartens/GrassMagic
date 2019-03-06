@@ -10,6 +10,7 @@
 #define GM_DEBUG_SPELL_STATE_ID __LINE__
 #define GM_DEBUG_RESOURCE_NUM_ID __LINE__
 
+
 namespace GMMisc
 {
 	inline FRotator ClampRotator(const FRotator& OriginalRot, const FRotator& NewRot, float ClampAngle) noexcept

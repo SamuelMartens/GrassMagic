@@ -37,8 +37,23 @@ public:
 		}
 	}
 
+	template<typename T>
+	T* GetEffectOfType(uint64_t IgnoredId)
+	{
+		for (size_t i = 0; i < Effects.Num(); ++i)
+		{
+			if (Effects[i]->IsA(T::StaticClass()) && Effects[i]->GetId() != IgnoredId)
+				return Cast<T>(Effects[i]);
+		}
+
+		return nullptr;
+	}
+
+
+
 private:
 
+	UPROPERTY()
 	TArray<UGMBaseSpellEffect*> Effects;
 
 };

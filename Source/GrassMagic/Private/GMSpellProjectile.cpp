@@ -81,8 +81,15 @@ void AGMSpellProjectile::AffectOverlappedActor(AActor* Actor)
 	if (!SpellEffectManag)
 		return;
 
+	// I don't assign name here and I think it's ok, but in case this will be somehow
+	// garbage collected, first thing to try is to assign unique name on creation.
 	UGMBaseSpellEffect* SpellEffect =
-		NewObject<UGMSpellEffect_Damage_3>(this, UGMSpellEffect_Damage_3::StaticClass(), TEXT("Damage Effect"));
+		NewObject<UGMSpellEffect_Control_3>(this, UGMSpellEffect_Control_3::StaticClass());
+
+	//#DEBUG remember to set it up for Control !!!!
+	//Cast<UGMSpellEffect_Control_1>(SpellEffect)->SetProjectileImpactPosition(GetActorLocation());
+	//Cast<UGMSpellEffect_Control_1>(SpellEffect)->SetProjectileImpactRotation(GetActorForwardVector().Rotation());
+
 
 	SpellEffect->Init(Cast<APawn>(Actor), Instigator, SpellValue);
 	SpellEffectManag->AddAndStartEffect(SpellEffect);

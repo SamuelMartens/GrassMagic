@@ -30,6 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetHealth() const noexcept { return Health; }
 
+	float GetDamageResist() const { return DamageResist; }
+
+	void SetDamageResist(float val) { DamageResist = val; }
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -37,10 +41,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health Resist", 
+		meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+	float DamageResist = 1.0f;
+	
 	UFUNCTION()
 	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	
 private:
-
+	
 	float Health;
 };

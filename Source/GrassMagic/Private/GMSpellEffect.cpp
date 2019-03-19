@@ -2,6 +2,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/InputComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Character.h"
@@ -99,31 +100,39 @@ const float UGMSpellEffect_Control_3::Control_Length_Multiplier = 1.0f;
 
 namespace
 {
-	template<typename T>
-	void DuplicateComponentToOtherActor(AActor* SourceActor, AActor* DestActor)
+	// All these functions exist only to avoid code duplication
+
+	void DestroyComponentGeneric(UActorComponent* Comp)
 	{
-		//#DEBUG when it all works check that component of required type is already not exists first
-		// before creation
-		static_assert(std::is_base_of<UActorComponent, T>::value, "Component should be derived from ActorComponent");
+		Comp->UnregisterComponent();
+		Comp->DestroyComponent();
+	}
 
-		check(SourceActor && DestActor);
-		T* SourceComp = Cast<T>(SourceActor->GetComponentByClass(T::StaticClass()));
-		check(SourceComp);
+	template<typename T>
+	T* DuplicateComponent(const APawn* Source, APawn* Target, USceneComponent* AttachComp = nullptr, FName AttachSocket = NAME_None)
+	{
+		static_assert(std::is_base_of<UActorComponent, T>::value, "Type should be derived from ActorComponent");
+		// Just make sure that component that we are trying to create are not already exists for target actor.
+		// In the situation where I use this function it is actually pretty useful, but if it will
+		// be a problem then it's ok to move it outside of this function to place where it is actually required.
+		// As far as I know UE4 is totally fine with actor having a few components of the same type
+		check(Target->GetComponentByClass(T::StaticClass()) == nullptr);
 
-		T* NewComp = DuplicateObject<T>(SourceComp, DestActor);
-		check(NewComp);
+		T* CompSource = Cast<T>(Source->GetComponentByClass(T::StaticClass()));
+		check(CompSource);
 
-		NewComp->UpdateComponentToWorld();
-		//#DEBUG what if I don't have root component? Should I care about it?
-		NewComp->SetupAttachment(DestActor->GetRootComponent());
-		NewComp->OnComponentCreated();
-		NewComp->RegisterComponent();
+		T* CompTarget = DuplicateObject<T>(CompSource, Target);
+		check(CompTarget);
 
-		//#DEBUG this is other thing that I am not sure about. Seems like I should add these components
-		// manually, but if it is intentionally not added cause it's not needed? It's so weird dude
-		DestActor->AddInstanceComponent(NewComp);
-		DestActor->AddOwnedComponent(NewComp);
+		if (AttachComp)
+			CompTarget->SetupAttachment(AttachComp, AttachSocket);
+		else
+			Target->SetRootComponent(AttachComp);
 
+		CompTarget->OnComponentCreated();
+		CompTarget->RegisterComponent();
+
+		return CompTarget;
 	}
 }
 
@@ -248,7 +257,8 @@ void UGMSpellEffect_Damage_2::OnDamageTick()
 void UGMSpellEffect_Damage_2::Die()
 {
 	Holder->GetWorldTimerManager().ClearTimer(TimerHandler_DamageTick);
-	ParticleEffect->DestroyComponent();
+	
+	DestroyComponentGeneric(ParticleEffect);
 
 	Super::Die();
 }
@@ -334,7 +344,7 @@ void UGMSpellEffect_Change_1::Die()
 	Holder->GetWorldTimerManager().ClearTimer(TimerHanlder_ParticleOrientation);
 	Holder->GetWorldTimerManager().ClearTimer(TimerHandler_OnDie);
 
-	ParticleEffect->DestroyComponent();
+	DestroyComponentGeneric(ParticleEffect);
 
 	UGMHealthComponent* HealthComp = Cast<UGMHealthComponent>(Holder->GetComponentByClass(UGMHealthComponent::StaticClass()));
 	check(HealthComp);
@@ -517,15 +527,15 @@ bool UGMSpellEffect_Control_2::TryPassControllerResponsibility()
 
 void UGMSpellEffect_Control_3::Start()
 {
-
 	check(Holder);
 
 	AGMWorldSettings* WorldSetting = Cast<AGMWorldSettings>(Holder->GetWorld()->GetWorldSettings());
 	check(WorldSetting && WorldSetting->ControlGrade3);
 
+	// Set up particles
 	USkeletalMeshComponent* SkeletalCompHolder = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 	check(SkeletalCompHolder);
-
+	// #DEBUG make my own by class getter with assert
 	USkeletalMeshComponent* SkeletalCompInst = Cast<USkeletalMeshComponent>(Instigator->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 	check(SkeletalCompInst);
 
@@ -544,36 +554,55 @@ void UGMSpellEffect_Control_3::Start()
 	ParticleEffectInstigator->bAbsoluteRotation = true;
 	ParticleEffectInstigator->bAutoDestroy = false;
 
+	// Create required components
+	CreateComponentsToControl();
+
+	// Set up proper controller possession
 	HolderController = Holder->GetController();
 	InstigatorController = Instigator->GetController();
-	//#DEBUG this name is disaster,  think about something else
-	CreateRequiredComponentsToControlOtherCreature();
 
 	HolderController->UnPossess();
 	InstigatorController->UnPossess();
 
 	InstigatorController->Possess(Holder);
 
+	// Set up timers
 	Holder->GetWorldTimerManager().SetTimer(TimerHandler_OnDie, this, &UGMSpellEffect_Control_3::Die, Dummy_Period, false,
 		Value * Control_Length_Multiplier);
 
 	Holder->GetWorldTimerManager().SetTimer(TimerHandler_ParticleActivation, this, &UGMSpellEffect_Control_3::OnParticleEffectActivate,
 		Particle_Effect_Activation_Interval, true, Particle_Effect_Activation_Interval);
+
+	// Set up additional properties (required to make movement smooth)
+	UMovementComponent* MovementCompInst = Cast<UMovementComponent>(Instigator->GetComponentByClass(UMovementComponent::StaticClass()));
+	check(MovementCompInst);
+
 }
 
 void UGMSpellEffect_Control_3::Die()
 {
+	Holder->GetWorldTimerManager().ClearTimer(TimerHandler_OnDie);
+	Holder->GetWorldTimerManager().ClearTimer(TimerHandler_ParticleActivation);
+
 	InstigatorController->UnPossess();
 
 	InstigatorController->Possess(Instigator);
 	HolderController->Possess(Holder);
 
 	ParticleEffectHolder->Deactivate();
+	DestroyComponentGeneric(ParticleEffectHolder);
+
 	ParticleEffectInstigator->Deactivate();
+	DestroyComponentGeneric(ParticleEffectInstigator);
+	
+	UCameraComponent* CameraCompHolder = Cast<UCameraComponent>(Holder->GetComponentByClass(UCameraComponent::StaticClass()));
+	check(CameraCompHolder);
+	DestroyComponentGeneric(CameraCompHolder);
 
-	Holder->GetWorldTimerManager().ClearTimer(TimerHandler_OnDie);
-	Holder->GetWorldTimerManager().ClearTimer(TimerHandler_ParticleActivation);
-
+	USpringArmComponent* SpringArmCompHolder = Cast<USpringArmComponent>(Holder->GetComponentByClass(USpringArmComponent::StaticClass()));
+	check(SpringArmCompHolder);
+	DestroyComponentGeneric(SpringArmCompHolder);	
+	
 	Super::Die();
 }
 
@@ -583,24 +612,9 @@ void UGMSpellEffect_Control_3::OnParticleEffectActivate()
 	ParticleEffectInstigator->Activate(true);
 }
 
-void UGMSpellEffect_Control_3::CreateRequiredComponentsToControlOtherCreature()
-{
-	//#DEBUG when it all works check that component of required type is already not exists first
-	// before creation
-	
-	USpringArmComponent* SpringArmCompInst = Cast<USpringArmComponent>(Instigator->GetComponentByClass(USpringArmComponent::StaticClass()));
-	UCameraComponent* CameraCompInst = Cast<UCameraComponent>(Instigator->GetComponentByClass(UCameraComponent::StaticClass()));
+void UGMSpellEffect_Control_3::CreateComponentsToControl()
+{	
+	USpringArmComponent* SpringArmCompHolder = DuplicateComponent<USpringArmComponent>(Instigator, Holder, Holder->GetRootComponent());
 
-
-	USpringArmComponent* SpringArmCompHolder = DuplicateObject<USpringArmComponent>(SpringArmCompInst, Holder);
-	SpringArmCompHolder->UpdateComponentToWorld();
-
-	//#DEBUG what if I don't have root component? Should I care about it?
-	SpringArmCompHolder->SetupAttachment(Holder->GetRootComponent());
-	SpringArmCompHolder->OnComponentCreated();
-	SpringArmCompHolder->RegisterComponent();
-	auto Owner = SpringArmCompHolder->GetOwner();
-
-	
-
+	DuplicateComponent<UCameraComponent>(Instigator, Holder, SpringArmCompHolder, USpringArmComponent::SocketName);
 }

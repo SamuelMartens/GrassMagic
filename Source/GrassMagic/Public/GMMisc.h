@@ -23,4 +23,21 @@ namespace GMMisc
 		
 		return OriginalRot + DiffRot;
 	}
+
+
+	template<typename T>
+	T* GetCompByClass(AActor* Actor)
+	{
+		static_assert(std::is_base_of<UActorComponent, T>::value, "Type should be derived from ActorComponent");
+		return Cast<T>(Actor->GetComponentByClass(T::StaticClass()));
+	}
+
+	template<typename T>
+	T* GetCompByClassCheck(AActor* Actor)
+	{
+		T* GetResult = GetCompByClass<T>(Actor);
+		check(GetResult);
+
+		return GetResult;
+	}
 }

@@ -1,6 +1,6 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
-#include "GrassMagicCharacter.h"
+#include "GMPlayerCharacter.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -13,12 +13,12 @@
 #include "GMHealthComponent.h"
 
 
-const float AGrassMagicCharacter::Input_Value_Per_Tick = 1.0f;
+const float AGMPlayerCharacter::Input_Value_Per_Tick = 1.0f;
 
 //////////////////////////////////////////////////////////////////////////
 // AGrassMagicCharacter
 
-AGrassMagicCharacter::AGrassMagicCharacter()
+AGMPlayerCharacter::AGMPlayerCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -56,7 +56,7 @@ AGrassMagicCharacter::AGrassMagicCharacter()
 	HealthComponent = CreateDefaultSubobject<UGMHealthComponent>(TEXT("HealthComponent"));
 }
 
-void AGrassMagicCharacter::BeginPlay()
+void AGMPlayerCharacter::BeginPlay()
 {
 
 	Super::BeginPlay();
@@ -67,7 +67,7 @@ void AGrassMagicCharacter::BeginPlay()
 //////////////////////////////////////////////////////////////////////////
 // Input
 
-void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void AGMPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
@@ -92,46 +92,23 @@ void AGrassMagicCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	PlayerInputComponent->BindAction("ReleaseSpell", IE_Pressed, SpellComponent, &UGMSpellComponent::HandleReleaseSpell_Pressed);
 	PlayerInputComponent->BindAction("ReleaseSpell", IE_Released, SpellComponent, &UGMSpellComponent::HandleReleaseSpell_Released);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AGrassMagicCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AGrassMagicCharacter::MoveRight);
+	PlayerInputComponent->BindAxis(Move_Forward_Axis_Binding_Name, this, &AGMPlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis(Move_Right_Axis_Binding_Name, this, &AGMPlayerCharacter::MoveRight);
 
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis(Turn_Axis_Binding_Name, this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis(LookUp_Axis_Binding_Name, this, &APawn::AddControllerPitchInput);
 }
 
-void AGrassMagicCharacter::MoveForward(float Value)
+void AGMPlayerCharacter::MoveForward(float Value)
 {
 	Value = SpellComponent->AdjustMovement(Value);
 
-	if (Controller == NULL || Value == 0.0f)
-		return;
-
-	// find out which way is forward
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-	// get forward vector
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(Direction, Value);
+	Super::MoveForward(Value);
 }
 
-void AGrassMagicCharacter::MoveRight(float Value)
+void AGMPlayerCharacter::MoveRight(float Value)
 {
 	Value = SpellComponent->AdjustMovement(Value);
 
-	if (Controller == NULL || Value == 0.0f)
-		return;
-
-	// find out which way is right
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
-	// get right vector 
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	// add movement in that direction
-	
-	AddMovementInput(Direction, Value);
+	Super::MoveRight(Value);
 }

@@ -1,7 +1,7 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "GrassMagicGameMode.h"
-#include "GrassMagicCharacter.h"
+#include "GMPlayerCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AGrassMagicGameMode::AGrassMagicGameMode()

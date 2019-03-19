@@ -365,7 +365,7 @@ protected:
 
 private:
 
-	void CreateRequiredComponentsToControlOtherCreature();
+	void CreateComponentsToControl();
 
 	FTimerHandle TimerHandler_OnDie;
 	FTimerHandle TimerHandler_ParticleActivation;

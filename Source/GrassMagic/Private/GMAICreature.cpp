@@ -19,10 +19,4 @@ void AGMAICreature::BeginPlay()
 	Super::BeginPlay();
 }
 
-// Called to bind functionality to input
-void AGMAICreature::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
 

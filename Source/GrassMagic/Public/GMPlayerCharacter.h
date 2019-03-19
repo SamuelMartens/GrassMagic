@@ -4,11 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "GrassMagicCharacter.generated.h"
+
+#include "GMCharacter.h"
+
+#include "GMPlayerCharacter.generated.h"
 
 
 UCLASS(config=Game)
-class AGrassMagicCharacter : public ACharacter
+class AGMPlayerCharacter : public AGMCharacter
 {
 	GENERATED_BODY()
 
@@ -30,7 +33,7 @@ class AGrassMagicCharacter : public ACharacter
 	class UGMHealthComponent* HealthComponent;
 
 public:
-	AGrassMagicCharacter();
+	AGMPlayerCharacter();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
@@ -42,10 +45,10 @@ public:
 
 protected:
 	/** Called for forwards/backward input */
-	void MoveForward(float Value);
+	virtual void MoveForward(float Value) override;
 
 	/** Called for side to side input */
-	void MoveRight(float Value);
+	virtual void MoveRight(float Value) override;
 
 	void BeginPlay() override;
 

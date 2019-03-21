@@ -375,4 +375,6 @@ private:
 
 	AController* HolderController = nullptr;
 	AController* InstigatorController = nullptr;
+
+	FRotator HolderRotationRate;
 };

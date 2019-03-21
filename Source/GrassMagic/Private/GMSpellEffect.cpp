@@ -554,7 +554,10 @@ void UGMSpellEffect_Control_3::Start()
 		Particle_Effect_Activation_Interval, true, Particle_Effect_Activation_Interval);
 
 	// Set up additional properties (required to make movement smooth)
-	UMovementComponent* MovementCompInst = GMMisc::GetCompByClassCheck<UMovementComponent>(Instigator);
+	UCharacterMovementComponent* MovementCompHolder = GMMisc::GetCompByClassCheck<UCharacterMovementComponent>(Holder);
+	HolderRotationRate = MovementCompHolder->RotationRate;
+
+	MovementCompHolder->RotationRate = GMMisc::GetCompByClassCheck<UCharacterMovementComponent>(Instigator)->RotationRate;
 
 }
 
@@ -580,6 +583,8 @@ void UGMSpellEffect_Control_3::Die()
 	USpringArmComponent* SpringArmCompHolder = GMMisc::GetCompByClassCheck<USpringArmComponent>(Holder);
 	DestroyComponentGeneric(SpringArmCompHolder);	
 	
+	GMMisc::GetCompByClassCheck<UCharacterMovementComponent>(Holder)->RotationRate = HolderRotationRate;
+
 	Super::Die();
 }
 

@@ -3,6 +3,7 @@
 #include "GMInputHandlerGeneric.h"
 
 #include "GMSpellComponent.h"
+#include "GMMisc.h"
 
 void FGMInputHandlerGeneric::Init(APawn* NewOwner, UGMSpellComponent* SpellComp, void (UGMSpellComponent::*CallBackRelease)())
 {
@@ -17,5 +18,5 @@ UGMSpellComponent* FGMInputHandlerGeneric::GetSpellComp()
 {
 	check(Owner.IsValid());
 
-	return Cast<UGMSpellComponent>(Owner->GetComponentByClass(UGMSpellComponent::StaticClass()));
+	return  GMMisc::GetCompByClassCheck<UGMSpellComponent>(Owner.Get());
 }

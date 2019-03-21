@@ -122,7 +122,7 @@ bool UGMSpellReleaser::GetAimLocationAndRotation(FVector& Location, FRotator& Ro
 	Cast<APlayerController>(GenHandler.GerOwner()->GetController())->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotation);
 
 	// Get location of left hand socket
-	const USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(GenHandler.GerOwner()->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+	const USkeletalMeshComponent* SkeletalComp = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(GenHandler.GerOwner().Get());
 	Location = SkeletalComp->GetSocketLocation(SpellComp->GetLeftHandCastSocket());
 
 	const FVector TraceEnd = CameraLocation + CameraRotation.Vector() * Aim_Trace_Length;

@@ -14,6 +14,7 @@
 #include "GMSpellEffectManagerComponent.h"
 #include "GMWorldSettings.h"
 #include "GMSpellComponent.h"
+#include "GMMisc.h"
 
 
 const static float Dummy_Period = 1.0f;
@@ -164,9 +165,7 @@ void UGMBaseSpellEffect::Die()
 {
 	check(Holder);
 
-	UGMSpellEffectManagerComponent* EffectManager = Cast<UGMSpellEffectManagerComponent>
-		(Holder->GetComponentByClass(UGMSpellEffectManagerComponent::StaticClass()));
-	check(EffectManager);
+	UGMSpellEffectManagerComponent* EffectManager = GMMisc::GetCompByClassCheck<UGMSpellEffectManagerComponent>(Holder);
 
 	EffectManager->RemoveEffect(GetId());
 }
@@ -191,8 +190,7 @@ void UGMSpellEffect_Damage_1::Start()
 	AGMWorldSettings* WorldSetting = Cast<AGMWorldSettings>(Holder->GetWorld()->GetWorldSettings());
 	check(WorldSetting && WorldSetting->DamageGrade1);
 
-	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalComp);
+	USkeletalMeshComponent* SkeletalComp = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Holder);
 
 	ParticleEffect = UGameplayStatics::SpawnEmitterAttached(WorldSetting->DamageGrade1, SkeletalComp, Attach_Socket);
 
@@ -221,8 +219,7 @@ void UGMSpellEffect_Damage_2::Start()
 	AGMWorldSettings* WorldSetting = Cast<AGMWorldSettings>(Holder->GetWorld()->GetWorldSettings());
 	check(WorldSetting && WorldSetting->DamageGrade2);
 
-	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalComp);
+	USkeletalMeshComponent* SkeletalComp = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Holder);
 
 	ParticleEffect = UGameplayStatics::SpawnEmitterAttached(WorldSetting->DamageGrade2, SkeletalComp, Attach_Socket);
 	ParticleEffect->RelativeScale3D = Particle_Effect_Scale;
@@ -272,8 +269,7 @@ void UGMSpellEffect_Damage_3::Start()
 	AGMWorldSettings* WorldSetting = Cast<AGMWorldSettings>(Holder->GetWorld()->GetWorldSettings());
 	check(WorldSetting && WorldSetting->DamageGrade3);
 
-	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalComp);
+	USkeletalMeshComponent* SkeletalComp = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Holder);
 
 	ParticleEffect = UGameplayStatics::SpawnEmitterAttached(WorldSetting->DamageGrade3, SkeletalComp, 
 		NAME_None, FVector(ForceInit), FRotator::ZeroRotator, Particle_Effect_Scale);
@@ -298,8 +294,7 @@ void UGMSpellEffect_Change_1::Start()
 	AGMWorldSettings* WorldSetting = Cast<AGMWorldSettings>(Holder->GetWorld()->GetWorldSettings());
 	check(WorldSetting && WorldSetting->ChangeGrade1);
 
-	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalComp);
+	USkeletalMeshComponent* SkeletalComp = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Holder);
 
 	ParticleEffect = UGameplayStatics::SpawnEmitterAttached(WorldSetting->ChangeGrade1, SkeletalComp, Attach_Socket);
 	ParticleEffect->bAutoDestroy = false;
@@ -309,9 +304,8 @@ void UGMSpellEffect_Change_1::Start()
 	ParticleEffect->bAbsoluteRotation = true;
 	ParticleEffect->RelativeRotation = Particle_Effect_Init_Rotation;
 
+	UGMHealthComponent* HealthComp = GMMisc::GetCompByClassCheck<UGMHealthComponent>(Holder);
 
-	UGMHealthComponent* HealthComp = Cast<UGMHealthComponent>(Holder->GetComponentByClass(UGMHealthComponent::StaticClass()));
-	check(HealthComp);
 	HealthComp->SetDamageResist(HealthComp->GetDamageResist() * Damage_Resist_Multiplier);
 	
 	Holder->GetWorldTimerManager().SetTimer(TimerHandler_OnDie, this, &UGMSpellEffect_Change_1::Die, Dummy_Period,
@@ -346,8 +340,7 @@ void UGMSpellEffect_Change_1::Die()
 
 	DestroyComponentGeneric(ParticleEffect);
 
-	UGMHealthComponent* HealthComp = Cast<UGMHealthComponent>(Holder->GetComponentByClass(UGMHealthComponent::StaticClass()));
-	check(HealthComp);
+	UGMHealthComponent* HealthComp = GMMisc::GetCompByClassCheck<UGMHealthComponent>(Holder);
 	HealthComp->SetDamageResist(HealthComp->GetDamageResist() / Damage_Resist_Multiplier);
 
 	Super::Die();
@@ -361,12 +354,9 @@ void UGMSpellEffect_Change_2::Start()
 	AGMWorldSettings* WorldSetting = Cast<AGMWorldSettings>(Holder->GetWorld()->GetWorldSettings());
 	check(WorldSetting && WorldSetting->ChangeGrade2);
 
-	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalComp);
+	USkeletalMeshComponent* SkeletalComp = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Holder);
 
-	UCharacterMovementComponent* CharMoveComp = 
-		Cast<UCharacterMovementComponent>(Holder->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
-	check(CharMoveComp);
+	UCharacterMovementComponent* CharMoveComp = GMMisc::GetCompByClassCheck<UCharacterMovementComponent>(Holder);
 
 	ParticleEffectLeft = UGameplayStatics::SpawnEmitterAttached(WorldSetting->ChangeGrade2, SkeletalComp, Attach_Socket_Left);
 	ParticleEffectLeft->RelativeScale3D = Particle_Effect_Scale;
@@ -393,9 +383,7 @@ void UGMSpellEffect_Change_2::Die()
 
 	Holder->GetWorldTimerManager().ClearTimer(TimerHandler_OnDie);
 
-	UCharacterMovementComponent* CharMoveComp =
-		Cast<UCharacterMovementComponent>(Holder->GetComponentByClass(UCharacterMovementComponent::StaticClass()));
-	check(CharMoveComp);
+	UCharacterMovementComponent* CharMoveComp = GMMisc::GetCompByClassCheck<UCharacterMovementComponent>(Holder);
 
 	CharMoveComp->MaxWalkSpeed /= Movement_Multiplier;
 
@@ -410,8 +398,7 @@ void UGMSpellEffect_Change_3::Start()
 	AGMWorldSettings* WorldSetting = Cast<AGMWorldSettings>(Holder->GetWorld()->GetWorldSettings());
 	check(WorldSetting && WorldSetting->ChangeGrade3);
 
-	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalComp);
+	USkeletalMeshComponent* SkeletalComp = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Holder);
 
 	ParticleEffectLeft = UGameplayStatics::SpawnEmitterAttached(WorldSetting->ChangeGrade3, SkeletalComp, Attach_Socket_Left);
 	ParticleEffectLeft->RelativeScale3D = Particle_Effect_Scale;
@@ -472,8 +459,7 @@ void UGMSpellEffect_Control_2::Start()
 	AGMWorldSettings* WorldSetting = Cast<AGMWorldSettings>(Holder->GetWorld()->GetWorldSettings());
 	check(WorldSetting && WorldSetting->ControlGrade2);
 
-	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalComp);
+	USkeletalMeshComponent* SkeletalComp = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Holder);
 
 	ParticleEffect = UGameplayStatics::SpawnEmitterAttached(WorldSetting->ControlGrade2, SkeletalComp, NAME_None);
 	ParticleEffect->RelativeScale3D = Particle_Effect_Scale;
@@ -509,9 +495,7 @@ bool UGMSpellEffect_Control_2::TryPassControllerResponsibility()
 	if (!HolderController)
 		return false;
 
-	UGMSpellEffectManagerComponent* EffectManager = Cast<UGMSpellEffectManagerComponent>
-		(Holder->GetComponentByClass(UGMSpellEffectManagerComponent::StaticClass()));
-	check(EffectManager);
+	UGMSpellEffectManagerComponent* EffectManager = GMMisc::GetCompByClassCheck<UGMSpellEffectManagerComponent>(Holder);
 
 	UGMSpellEffect_Control_2* OtherEffectOfSameType = EffectManager->GetEffectOfType<UGMSpellEffect_Control_2>(GetId());
 
@@ -533,12 +517,8 @@ void UGMSpellEffect_Control_3::Start()
 	check(WorldSetting && WorldSetting->ControlGrade3);
 
 	// Set up particles
-	USkeletalMeshComponent* SkeletalCompHolder = Cast<USkeletalMeshComponent>(Holder->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalCompHolder);
-	// #DEBUG make my own by class getter with assert
-	USkeletalMeshComponent* SkeletalCompInst = Cast<USkeletalMeshComponent>(Instigator->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalCompInst);
-
+	USkeletalMeshComponent* SkeletalCompHolder = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Holder);
+	USkeletalMeshComponent* SkeletalCompInst = GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(Instigator);
 
 	ParticleEffectHolder = UGameplayStatics::SpawnEmitterAttached(WorldSetting->ControlGrade3, SkeletalCompHolder, 
 		Attach_Socket, FVector(ForceInit), FRotator::ZeroRotator, Particle_Effect_Scale);
@@ -574,8 +554,7 @@ void UGMSpellEffect_Control_3::Start()
 		Particle_Effect_Activation_Interval, true, Particle_Effect_Activation_Interval);
 
 	// Set up additional properties (required to make movement smooth)
-	UMovementComponent* MovementCompInst = Cast<UMovementComponent>(Instigator->GetComponentByClass(UMovementComponent::StaticClass()));
-	check(MovementCompInst);
+	UMovementComponent* MovementCompInst = GMMisc::GetCompByClassCheck<UMovementComponent>(Instigator);
 
 }
 
@@ -595,12 +574,10 @@ void UGMSpellEffect_Control_3::Die()
 	ParticleEffectInstigator->Deactivate();
 	DestroyComponentGeneric(ParticleEffectInstigator);
 	
-	UCameraComponent* CameraCompHolder = Cast<UCameraComponent>(Holder->GetComponentByClass(UCameraComponent::StaticClass()));
-	check(CameraCompHolder);
+	UCameraComponent* CameraCompHolder = GMMisc::GetCompByClassCheck<UCameraComponent>(Holder);
 	DestroyComponentGeneric(CameraCompHolder);
 
-	USpringArmComponent* SpringArmCompHolder = Cast<USpringArmComponent>(Holder->GetComponentByClass(USpringArmComponent::StaticClass()));
-	check(SpringArmCompHolder);
+	USpringArmComponent* SpringArmCompHolder = GMMisc::GetCompByClassCheck<USpringArmComponent>(Holder);
 	DestroyComponentGeneric(SpringArmCompHolder);	
 	
 	Super::Die();

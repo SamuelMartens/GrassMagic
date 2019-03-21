@@ -11,6 +11,7 @@
 #include "GMSpellCaster.h"
 #include "GMSpellReleaser.h"
 #include "GMInputHandlerGeneric.h"
+#include "GMMisc.h"
 
 const float UGMSpellComponent::Movement_Adjust_Rate = 0.07f;
 const float UGMSpellComponent::Movement_Adjust_Timer_Interval = 1.0f;
@@ -258,8 +259,7 @@ void UGMSpellComponent::GenericSpawnCastEffect(UParticleSystem* Effect, const FV
 	LeftHandEffect->SetTemplate(Effect);
 	RightHandEffect->SetTemplate(Effect);
 
-	USkeletalMeshComponent* SkeletalComp = Cast<USkeletalMeshComponent>(GetOwner()->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	check(SkeletalComp);
+	USkeletalMeshComponent* SkeletalComp =  GMMisc::GetCompByClassCheck<USkeletalMeshComponent>(GetOwner());
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, false);
 

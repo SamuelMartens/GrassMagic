@@ -8,6 +8,7 @@
 #include "GMSpellComponent.h"
 #include "GMSpellEffectManagerComponent.h"
 #include "GMSpellEffect.h"
+#include "GMMisc.h"
 
 // Sets default values
 AGMSpellProjectile::AGMSpellProjectile()
@@ -75,8 +76,7 @@ void AGMSpellProjectile::OnDeath(UParticleSystemComponent* PSystem)
 
 void AGMSpellProjectile::AffectOverlappedActor(AActor* Actor)
 {
-	UGMSpellEffectManagerComponent* SpellEffectManag = 
-		Cast<UGMSpellEffectManagerComponent>(Actor->GetComponentByClass(UGMSpellEffectManagerComponent::StaticClass()));
+	UGMSpellEffectManagerComponent* SpellEffectManag = GMMisc::GetCompByClass<UGMSpellEffectManagerComponent>(Actor);
 
 	if (!SpellEffectManag)
 		return;
@@ -86,7 +86,7 @@ void AGMSpellProjectile::AffectOverlappedActor(AActor* Actor)
 	UGMBaseSpellEffect* SpellEffect =
 		NewObject<UGMSpellEffect_Control_3>(this, UGMSpellEffect_Control_3::StaticClass());
 
-	//#DEBUG remember to set it up for Control !!!!
+	//#DEBUG remember to set it up for Control 1 effect. It requires this special case
 	//Cast<UGMSpellEffect_Control_1>(SpellEffect)->SetProjectileImpactPosition(GetActorLocation());
 	//Cast<UGMSpellEffect_Control_1>(SpellEffect)->SetProjectileImpactRotation(GetActorForwardVector().Rotation());
 

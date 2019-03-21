@@ -81,14 +81,74 @@ void AGMSpellProjectile::AffectOverlappedActor(AActor* Actor)
 	if (!SpellEffectManag)
 		return;
 
-	// I don't assign name here and I think it's ok, but in case this will be somehow
-	// garbage collected, first thing to try is to assign unique name on creation.
-	UGMBaseSpellEffect* SpellEffect =
-		NewObject<UGMSpellEffect_Control_3>(this, UGMSpellEffect_Control_3::StaticClass());
+	UGMBaseSpellEffect* SpellEffect = nullptr;
 
-	//#DEBUG remember to set it up for Control 1 effect. It requires this special case
-	//Cast<UGMSpellEffect_Control_1>(SpellEffect)->SetProjectileImpactPosition(GetActorLocation());
-	//Cast<UGMSpellEffect_Control_1>(SpellEffect)->SetProjectileImpactRotation(GetActorForwardVector().Rotation());
+	switch (SpellType)
+	{
+	case FGMBaseGesture::EType::Damage:
+	{
+		switch (SpellGrade)
+		{
+		case 1:
+			SpellEffect = NewObject<UGMSpellEffect_Damage_1>(this, UGMSpellEffect_Damage_1::StaticClass());
+			break;
+		case 2:
+			SpellEffect = NewObject<UGMSpellEffect_Damage_2>(this, UGMSpellEffect_Damage_2::StaticClass());
+			break;
+		case 3:
+			SpellEffect = NewObject<UGMSpellEffect_Damage_3>(this, UGMSpellEffect_Damage_3::StaticClass());
+			break;
+		default:
+			check(false);
+			break;
+		}
+	}
+	break;
+	case FGMBaseGesture::EType::Control:
+	{
+		switch (SpellGrade)
+		{
+		case 1:
+			SpellEffect = NewObject<UGMSpellEffect_Control_1>(this, UGMSpellEffect_Control_1::StaticClass());
+			Cast<UGMSpellEffect_Control_1>(SpellEffect)->SetProjectileImpactPosition(GetActorLocation());
+			Cast<UGMSpellEffect_Control_1>(SpellEffect)->SetProjectileImpactRotation(GetActorForwardVector().Rotation());
+			break;
+		case 2:
+			SpellEffect = NewObject<UGMSpellEffect_Control_2>(this, UGMSpellEffect_Control_2::StaticClass());
+			break;
+		case 3:
+			SpellEffect = NewObject<UGMSpellEffect_Control_3>(this, UGMSpellEffect_Control_3::StaticClass());
+			break;
+		default:
+			check(false);
+			break;
+		}
+	}
+	break;
+	case FGMBaseGesture::EType::Change:
+	{
+		switch (SpellGrade)
+		{
+		case 1:
+			SpellEffect = NewObject<UGMSpellEffect_Change_1>(this, UGMSpellEffect_Change_1::StaticClass());
+			break;
+		case 2:
+			SpellEffect = NewObject<UGMSpellEffect_Change_2>(this, UGMSpellEffect_Change_2::StaticClass());
+			break;
+		case 3:
+			SpellEffect = NewObject<UGMSpellEffect_Change_3>(this, UGMSpellEffect_Change_3::StaticClass());
+			break;
+		default:
+			check(false);
+			break;
+		}
+	}
+	break;
+
+	default:
+		check(false);
+		break;
+	}
 
 
 	SpellEffect->Init(Cast<APawn>(Actor), Instigator, SpellValue);

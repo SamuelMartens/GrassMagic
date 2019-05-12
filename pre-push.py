@@ -18,10 +18,10 @@ from pydrive.drive import GoogleDrive
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/drive']
-CLIENT_SECRET_FILE =  'credentials_DRIVE.json'
+CLIENT_SECRET_FILE =  'client_secrets.json'
 FILE_NAME = 'Content.zip'
-ARCHIVE_DIRECTORY = 'Content'
-PUSH_DATE_FILE_NAME = 'LastPushDate.txt'
+ARCHIVE_DIRECTORY = '../../Content'
+PUSH_DATE_FILE_NAME = '../../LastPushDate.txt'
 
 def get_drive_service():
     """Shows basic usage of the Drive v3 API.

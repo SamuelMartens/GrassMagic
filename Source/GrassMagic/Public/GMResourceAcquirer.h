@@ -9,6 +9,14 @@
 
 #include "GMResourceAcquirer.generated.h"
 
+UENUM(BlueprintType)
+enum class EResourceRestoreStatus : uint8
+{
+	SelfRestore UMETA(DisplayName = "Self Restore"),
+	QuickRestore UMETA(DisplayName = "Quick Restore"),
+	SlowRestore UMETA(DisplayName = "Slow Restore")
+};
+
 UCLASS()
 class GRASSMAGIC_API UGMResourceAcquirer : public UObject
 {
@@ -24,6 +32,8 @@ class GRASSMAGIC_API UGMResourceAcquirer : public UObject
 	const static float Environment_Resource;
 	// We drop amount of our resource on this value, so we can quickly acquire more energy
 	const static float Acquire_Drop;
+	const static float Maximum_Resources;
+
 
 
 	const static float Damage_Resource_Per_Tick;
@@ -42,6 +52,12 @@ public:
 	void StopAcquire();
 
 	float GetResources() const {  return Resources; };
+	
+	static float GetMaximumResources() { return Maximum_Resources; }
+
+	float GetResourcesPercent() const;
+
+	EResourceRestoreStatus GetResourceRestoreStatus() const;
 
 	bool GestureCastTick(FGMBaseGesture::EType GestureType) noexcept;
 

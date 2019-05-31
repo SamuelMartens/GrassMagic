@@ -30,6 +30,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float GetHealth() const noexcept { return Health; }
 
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetHealthPercent() const noexcept { return FMath::Clamp(Health / MaxHealth, 0.0f, 1.0f); }
+
 	float GetDamageResist() const { return DamageResist; }
 
 	void SetDamageResist(float val) { DamageResist = val; }

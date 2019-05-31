@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "GrassMagicGameMode.generated.h"
+#include "GMGameModeBase.generated.h"
 
 UCLASS(minimalapi)
-class AGrassMagicGameMode : public AGameModeBase
+class AGMGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	AGrassMagicGameMode();
+	AGMGameModeBase();
 };
 
 

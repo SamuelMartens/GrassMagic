@@ -108,6 +108,12 @@ public:
 	int GetResources() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	float GetResourcesPercent() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
+	EResourceRestoreStatus GetResourceRestoreStatus() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Spell System")
 	ESpellComponentCurrentAction GetCurrentAction() const noexcept { return CurrentAction; }
 
 	UFUNCTION(BlueprintCallable, Category = "Spell System")

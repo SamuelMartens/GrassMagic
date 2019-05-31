@@ -4,6 +4,7 @@
 
 #include "GMSpellComponent.h"
 #include "GMMisc.h"
+#include "GMContract.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -12,6 +13,7 @@ const float UGMResourceAcquirer::Acquire_Tick = 0.1f;
 const float UGMResourceAcquirer::Acquire_Drop = 1000.0f;
 const float UGMResourceAcquirer::Environment_Resource = 200.0f;
 const float UGMResourceAcquirer::Resource_Balance_Coefficient = 0.007f;
+const float UGMResourceAcquirer::Maximum_Resources = UGMResourceAcquirer::Acquire_Drop + UGMResourceAcquirer::Environment_Resource;
 
 const float UGMResourceAcquirer::Damage_Resource_Per_Tick = 50.0f;
 const float UGMResourceAcquirer::Control_Resource_Per_Tick = 70.0f;
@@ -39,6 +41,30 @@ void UGMResourceAcquirer::StartAcquire()
 void UGMResourceAcquirer::StopAcquire()
 {
 	GenHandler.ExecuteReleaseCallBack();
+}
+
+float UGMResourceAcquirer::GetResourcesPercent() const
+{
+	CONTRACT.Postcondition([&] 
+	{
+		const float percent = GetResources() / GetMaximumResources();
+		return percent <= 1.0f && percent >= 0.0f;
+	});
+
+	return GetResources() / GetMaximumResources();
+}
+
+EResourceRestoreStatus UGMResourceAcquirer::GetResourceRestoreStatus() const
+{
+	const float Slow_Restore_Coefficient = 0.6f;
+
+	if (GetResources() < Environment_Resource)
+		return EResourceRestoreStatus::SelfRestore;
+
+	if (GetResources() <= GetMaximumResources() * Slow_Restore_Coefficient)
+		return EResourceRestoreStatus::QuickRestore;
+
+	return EResourceRestoreStatus::SlowRestore;
 }
 
 bool UGMResourceAcquirer::GestureCastTick(FGMBaseGesture::EType GestureType) noexcept

@@ -5,9 +5,9 @@
 #include <functional>
 
 #define CONTRACT GMContract DesignContract; DesignContract
-#define BOOL_COND(bool_cond) [&] { return bool_cond; }
+#define COND(bool_cond) [&] { return bool_cond; }
 
-
+//#TODD: make possible to completely turn it off during release, or just optional
 class GMContract
 {
 public:

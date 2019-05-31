@@ -19,7 +19,6 @@ void UGMHealthComponent::BeginPlay()
 
 	AActor* Owner = GetOwner();
 	check(Owner);
-
 	if (Owner)
 		Owner->OnTakeAnyDamage.AddDynamic(this, &UGMHealthComponent::HandleTakeAnyDamage);
 }

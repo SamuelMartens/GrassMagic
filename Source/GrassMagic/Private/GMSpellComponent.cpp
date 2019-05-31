@@ -12,6 +12,7 @@
 #include "GMSpellReleaser.h"
 #include "GMInputHandlerGeneric.h"
 #include "GMMisc.h"
+#include "GMContract.h"
 
 const float UGMSpellComponent::Movement_Adjust_Rate = 0.07f;
 const float UGMSpellComponent::Movement_Adjust_Timer_Interval = 1.0f;
@@ -151,7 +152,8 @@ float UGMSpellComponent::AdjustMovement(float Value)
 void UGMSpellComponent::GenericInputRelease()
 {
 	// At this point we should always some action in progress
-	check(CurrentActionState != ESpellComponentActionState::Idle);
+	CONTRACT.Precondition(COND(CurrentActionState != ESpellComponentActionState::Idle));
+
 
 	CurrentActionState = ESpellComponentActionState::Idle;
 	CurrentAction = ESpellComponentCurrentAction::None;
@@ -160,13 +162,29 @@ void UGMSpellComponent::GenericInputRelease()
 
 int UGMSpellComponent::GetResources() const
 {
-	check(ResAcq);
+	CONTRACT.Precondition(COND(ResAcq));
+
 	return ResAcq->GetResources();
+}
+
+float UGMSpellComponent::GetResourcesPercent() const
+{
+	CONTRACT.Precondition(COND(ResAcq));
+
+	return ResAcq->GetResourcesPercent();
+}
+
+EResourceRestoreStatus UGMSpellComponent::GetResourceRestoreStatus() const
+{
+	CONTRACT.Precondition(COND(ResAcq));
+
+	return ResAcq->GetResourceRestoreStatus();
 }
 
 float UGMSpellComponent::GetFocus() const
 {
-	check(SpellReleaser);
+	CONTRACT.Precondition(COND(SpellReleaser));
+
 	return SpellReleaser->GetFocus();
 }
 
@@ -182,14 +200,14 @@ float UGMSpellComponent::GetFocusMax() const
 
 void UGMSpellComponent::SetSpellProjectileBPType(TSubclassOf<AGMSpellProjectile> BPProjectileClass)
 {
-	check(SpellReleaser);
+	CONTRACT.Precondition(COND(SpellReleaser));
 	
     SpellReleaser->SetSpellProjectileBPType(BPProjectileClass);
 }
 
 void UGMSpellComponent::SpawnProjectile()
 {
-	check(SpellReleaser);
+	CONTRACT.Precondition(COND(SpellReleaser));
 
 	SpellReleaser->SpawnProjectile();
 }
@@ -282,7 +300,8 @@ void UGMSpellComponent::GenericSpawnCastEffect(UParticleSystem* Effect, const FV
 
 float UGMSpellComponent::Prepare(float InputValue)
 {
-	check(CurrentActionState == ESpellComponentActionState::Prepare);
+	CONTRACT.Precondition(COND(CurrentActionState == ESpellComponentActionState::Prepare));
+
 
 	APawn* PawnOwner = Cast<APawn>(GetOwner());
 
